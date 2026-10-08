@@ -1,67 +1,395 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ComexLab</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f7f9;
-      color: #17212b;
-    }
-
-    header {
-      background: #0e2a47;
-      color: white;
-      padding: 40px 20px;
-      text-align: center;
-    }
-
-    main {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 20px;
-    }
-
-    .card {
-      background: white;
-      padding: 25px;
-      border-radius: 14px;
-      box-shadow: 0 4px 14px rgba(0,0,0,.08);
-    }
-
-    h1 {
-      margin: 0;
-    }
-
-    h2 {
-      color: #0e2a47;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comex-Lab | Simulador de Comércio Exterior</title>
+<style>
+:root {
+  --navy:#102a46;
+  --blue:#176ba8;
+  --bg:#eef3f8;
+  --border:#dce5ee;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:#20334a;
+}
+header {
+  padding:28px 20px;
+  background:linear-gradient(110deg,#102a46,#176ba8);
+  color:white;
+  text-align:center;
+}
+header h1 { margin:0; font-size:32px; }
+header p { margin:9px 0 0; }
+main { max-width:1150px; margin:25px auto; padding:0 15px; }
+nav { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+button {
+  cursor:pointer;
+  border:0;
+  border-radius:9px;
+  padding:12px 16px;
+  font-weight:bold;
+}
+nav button {
+  background:white;
+  border:1px solid var(--border);
+  color:var(--navy);
+}
+nav button.active,button.calculate {
+  background:var(--blue);
+  color:white;
+}
+.panel {
+  display:none;
+  background:white;
+  border-radius:15px;
+  padding:25px;
+  box-shadow:0 5px 20px #142c4512;
+}
+.panel.active { display:block; }
+h2 { color:var(--navy); margin-top:0; }
+.description { color:#586c80; line-height:1.6; }
+.fields {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:14px;
+  margin:22px 0;
+}
+label { display:block; font-weight:bold; font-size:13px; margin-bottom:6px; }
+input,select {
+  width:100%;
+  border:1px solid #ccd8e5;
+  border-radius:8px;
+  padding:11px;
+  font-size:15px;
+  background:white;
+}
+.result {
+  background:#edf6fc;
+  border:1px solid #c6dfef;
+  padding:17px;
+  border-radius:11px;
+  margin-top:20px;
+}
+.result:empty { display:none; }
+table { width:100%; border-collapse:collapse; }
+td { padding:10px 5px; border-bottom:1px solid #d4e4ef; }
+td:last-child { text-align:right; font-weight:bold; }
+.notice {
+  background:#fff8e8;
+  border-left:4px solid #daa342;
+  padding:13px;
+  margin-top:20px;
+  font-size:13px;
+  line-height:1.6;
+}
+footer {
+  text-align:center;
+  color:#68798a;
+  padding:30px 15px;
+  font-size:12px;
+}
+@media(max-width:600px) {
+  nav button { flex:1 1 43%; }
+  .panel { padding:16px; }
+  header h1 { font-size:27px; }
+}
+</style>
 </head>
-
 <body>
-
 <header>
-  <h1>ComexLab</h1>
-  <p>Aprenda. Simule. Decida.</p>
+<h1>Comex-Lab</h1>
+<p>Aprenda. Simule. Decida.</p>
+<p>Laboratório Interativo de Comércio Exterior</p>
 </header>
 
 <main>
-  <div class="card">
-    <h2>Simulador de Comércio Exterior</h2>
+<nav>
+<button class="active" onclick="showTab('importacao',this)">Importação</button>
+<button onclick="showTab('exportacao',this)">Exportação</button>
+<button onclick="showTab('incoterms',this)">Incoterms</button>
+<button onclick="showTab('modais',this)">Modais Logísticos</button>
+<button onclick="showTab('analise',this)">Compras & Vendas</button>
+</nav>
 
-    <p>Aplicação funcionando no GitHub Pages.</p>
+<section id="importacao" class="panel active">
+<h2>Simulador de Importação</h2>
+<p class="description">Exemplo: importação de 5.000 kg de tecido da China para Fortaleza, Ceará. Altere os valores para estudar diferentes operações.</p>
+<div class="fields">
+<div><label>País de origem</label><select><option>China</option><option>Índia</option><option>Estados Unidos</option><option>Portugal</option><option>Outro</option></select></div>
+<div><label>Incoterm de referência</label><select id="im_term"><option>FOB</option><option>EXW</option><option>FCA</option><option>CFR</option><option>CIF</option><option>CPT</option><option>CIP</option><option>DAP</option><option>DPU</option><option>DDP</option></select></div>
+<div><label>Mercadoria (USD)</label><input id="im_goods" type="number" value="22000" min="0"></div>
+<div><label>Quantidade (kg)</label><input id="im_qty" type="number" value="5000" min="0"></div>
+<div><label>Câmbio (R$/USD)</label><input id="im_fx" type="number" value="5.30" step="0.01" min="0"></div>
+<div><label>Frete internacional (USD)</label><input id="im_freight" type="number" value="2500" min="0"></div>
+<div><label>Seguro internacional (USD)</label><input id="im_insurance" type="number" value="200" min="0"></div>
+<div><label>II (%)</label><input id="im_ii" type="number" value="18" min="0"></div>
+<div><label>IPI (%)</label><input id="im_ipi" type="number" value="5" min="0"></div>
+<div><label>PIS-Importação (%)</label><input id="im_pis" type="number" value="2.10" step="0.01" min="0"></div>
+<div><label>COFINS-Importação (%)</label><input id="im_cofins" type="number" value="9.65" step="0.01" min="0"></div>
+<div><label>ICMS (%)</label><input id="im_icms" type="number" value="20" min="0"></div>
+<div><label>Despesas locais (R$)</label><input id="im_local" type="number" value="5000" min="0"></div>
+<div><label>Margem desejada sobre a venda (%)</label><input id="im_margin" type="number" value="30" min="0"></div>
+</div>
+<button class="calculate" onclick="calcImport()">Calcular Importação</button>
+<div id="im_result" class="result"></div>
+<div class="notice">Modelo didático simplificado. O valor informado da mercadoria deve ser tratado como valor da mercadoria isolada (sem frete e seguro internacionais), independentemente do Incoterm selecionado. Em operações reais, ajuste o preço cotado para evitar duplicidade. Impostos e bases tributárias dependem de NCM, origem, legislação, regimes e UF. Os campos não representam alíquotas oficiais.</div>
+</section>
 
-    <p>
-      Próxima etapa: simuladores de importação,
-      exportação, Incoterms, modais logísticos
-      e análise de compras e vendas.
-    </p>
-  </div>
+<section id="exportacao" class="panel">
+<h2>Simulador de Exportação</h2>
+<p class="description">Calcule receita, custos, lucro, margem e preço mínimo de uma venda internacional de tecidos, malhas ou rendas.</p>
+<div class="fields">
+<div><label>Quantidade exportada</label><input id="ex_qty" type="number" value="5000" min="0"></div>
+<div><label>Preço unitário de venda (USD)</label><input id="ex_price" type="number" value="3.50" step="0.01" min="0"></div>
+<div><label>Custo unitário de produção (R$)</label><input id="ex_cost" type="number" value="10" step="0.01" min="0"></div>
+<div><label>Despesas internas (R$)</label><input id="ex_internal" type="number" value="3500" min="0"></div>
+<div><label>Frete internacional pago pelo exportador (USD)</label><input id="ex_freight" type="number" value="1800" min="0"></div>
+<div><label>Seguro pago pelo exportador (USD)</label><input id="ex_insurance" type="number" value="150" min="0"></div>
+<div><label>Câmbio (R$/USD)</label><input id="ex_fx" type="number" value="5.30" step="0.01" min="0"></div>
+</div>
+<button class="calculate" onclick="calcExport()">Calcular Exportação</button>
+<div id="ex_result" class="result"></div>
+<div class="notice">Exemplo gerencial. Informe apenas as despesas de frete e seguro efetivamente pagas pelo exportador. O modelo não calcula automaticamente os tributos, incentivos, custos bancários nem as obrigações específicas de cada Incoterm.</div>
+</section>
+
+<section id="incoterms" class="panel">
+<h2>Incoterms® 2020</h2>
+<p class="description">Selecione uma regra para compreender a divisão de responsabilidades entre vendedor e comprador.</p>
+<div class="fields">
+<div><label>Selecione o Incoterm</label>
+<select id="in_term" onchange="calcIncoterm()">
+<option>EXW</option><option>FCA</option><option>FAS</option><option>FOB</option>
+<option>CFR</option><option>CIF</option><option>CPT</option><option>CIP</option>
+<option>DAP</option><option>DPU</option><option>DDP</option>
+</select></div>
+</div>
+<button class="calculate" onclick="calcIncoterm()">Consultar Incoterm</button>
+<div id="in_result" class="result"></div>
+<div class="notice">Os Incoterms® 2020 são regras da ICC. A transferência do risco pode ocorrer antes da chegada, mesmo quando o vendedor paga o frete até o destino. O ponto/local nomeado no contrato é fundamental.</div>
+</section>
+
+<section id="modais" class="panel">
+<h2>Comparador de Modais Logísticos</h2>
+<p class="description">Compare frete, prazo e custo financeiro do capital imobilizado durante o transporte. Insira cotações compatíveis com a rota estudada.</p>
+<div class="fields">
+<div><label>Valor da carga (USD)</label><input id="mo_value" type="number" value="22000" min="0"></div>
+<div><label>Custo diário do capital (%)</label><input id="mo_rate" type="number" value="0.03" step="0.01" min="0"></div>
+<div><label>Frete marítimo (USD)</label><input id="mo_sea" type="number" value="2500" min="0"></div>
+<div><label>Prazo marítimo (dias)</label><input id="mo_seadays" type="number" value="40" min="0"></div>
+<div><label>Frete aéreo (USD)</label><input id="mo_air" type="number" value="7500" min="0"></div>
+<div><label>Prazo aéreo (dias)</label><input id="mo_airdays" type="number" value="7" min="0"></div>
+<div><label>Frete rodoviário (USD)</label><input id="mo_road" type="number" value="3000" min="0"></div>
+<div><label>Prazo rodoviário (dias)</label><input id="mo_roaddays" type="number" value="12" min="0"></div>
+<div><label>Frete ferroviário (USD)</label><input id="mo_rail" type="number" value="2800" min="0"></div>
+<div><label>Prazo ferroviário (dias)</label><input id="mo_raildays" type="number" value="20" min="0"></div>
+</div>
+<button class="calculate" onclick="calcModes()">Comparar Modais</button>
+<div id="mo_result" class="result"></div>
+<div class="notice">Exemplo educacional. Para China–Fortaleza, rodoviário e ferroviário não são alternativas diretas de transporte internacional. Compare somente rotas viáveis. Preços são fictícios e não representam cotações logísticas reais.</div>
+</section>
+
+<section id="analise" class="panel">
+<h2>Análise de Compras e Vendas</h2>
+<p class="description">Avalie custo unitário, faturamento, margem de contribuição, markup e ponto de equilíbrio.</p>
+<div class="fields">
+<div><label>Quantidade vendida</label><input id="an_qty" type="number" value="5000" min="0"></div>
+<div><label>Custo total da mercadoria (R$)</label><input id="an_cost" type="number" value="125000" min="0"></div>
+<div><label>Preço unitário de venda (R$)</label><input id="an_price" type="number" value="38" step="0.01" min="0"></div>
+<div><label>Impostos sobre vendas (%)</label><input id="an_tax" type="number" value="10" min="0"></div>
+<div><label>Comissão sobre vendas (%)</label><input id="an_comm" type="number" value="5" min="0"></div>
+<div><label>Outras despesas variáveis unitárias (R$)</label><input id="an_extra" type="number" value="0" min="0"></div>
+<div><label>Despesas fixas do período (R$)</label><input id="an_fixed" type="number" value="15000" min="0"></div>
+</div>
+<button class="calculate" onclick="calcAnalysis()">Analisar Operação</button>
+<div id="an_result" class="result"></div>
+<div class="notice">A análise é gerencial e simplificada. O ponto de equilíbrio considera margem de contribuição positiva e a mesma unidade de quantidade utilizada na operação.</div>
+</section>
 </main>
+<footer>Comex-Lab — Plataforma educacional de Comércio Exterior. Simulações sem finalidade de apuração fiscal oficial.</footer>
 
+<script>
+function showTab(id,btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function get(id) {
+  const el=document.getElementById(id);
+  const v=Number(el.value);
+  if(el.value.trim()==='' || !Number.isFinite(v) || v<0)
+    throw Error('Verifique o campo: '+id);
+  return v;
+}
+function positive(v,name) {
+  if(v<=0) throw Error(name+' deve ser maior que zero.');
+}
+function brl(v) {
+  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
+}
+function usd(v) {
+  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'USD'}).format(v);
+}
+function fmt(v) {
+  return new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(v);
+}
+function render(id,items) {
+  document.getElementById(id).innerHTML='<table>'+items.map(([a,b])=>
+    '<tr><td>'+a+'</td><td>'+b+'</td></tr>').join('')+'</table>';
+}
+function safely(id,fn) {
+  try { fn(); } catch(e) {
+    document.getElementById(id).textContent=e.message;
+  }
+}
+
+function calcImport() {
+safely('im_result',()=>{
+ const goods=get('im_goods'),qty=get('im_qty'),fx=get('im_fx');
+ const freight=get('im_freight'),insurance=get('im_insurance');
+ const local=get('im_local'),margin=get('im_margin');
+ positive(qty,'Quantidade'); positive(fx,'Câmbio');
+ if(margin>=100) throw Error('Margem desejada deve ser menor que 100%.');
+ const rate=get('im_icms')/100;
+ if(rate>=1) throw Error('ICMS deve ser menor que 100%.');
+ const cif=(goods+freight+insurance)*fx;
+ const ii=cif*get('im_ii')/100;
+ const ipi=(cif+ii)*get('im_ipi')/100;
+ const pis=cif*get('im_pis')/100;
+ const cofins=cif*get('im_cofins')/100;
+ const base=cif+ii+ipi+pis+cofins;
+ const icms=base*rate/(1-rate);
+ const taxes=ii+ipi+pis+cofins+icms;
+ const total=cif+taxes+local;
+ const unit=total/qty;
+ const sale=unit/(1-margin/100);
+ render('im_result',[
+ ['Valor aduaneiro CIF (simplificado)',brl(cif)],
+ ['II',brl(ii)],
+ ['IPI',brl(ipi)],
+ ['PIS-Importação (simplificado)',brl(pis)],
+ ['COFINS-Importação (simplificado)',brl(cofins)],
+ ['ICMS por dentro (simplificado)',brl(icms)],
+ ['Total de tributos estimados',brl(taxes)],
+ ['Outras despesas locais',brl(local)],
+ ['Custo total estimado',brl(total)],
+ ['Custo por kg',brl(unit)],
+ ['Participação dos tributos',fmt(taxes/total*100)+'%'],
+ ['Participação do frete internacional',fmt(freight*fx/total*100)+'%'],
+ ['Preço/kg para margem-alvo (antes das despesas de venda)',brl(sale)],
+ ['Fórmula CIF','(Mercadoria + Frete + Seguro) × Câmbio'],
+ ['Fórmula ICMS didático','Base × Alíquota / (1 − Alíquota)']
+ ]);
+});
+}
+
+function calcExport() {
+safely('ex_result',()=>{
+ const qty=get('ex_qty'),price=get('ex_price'),cost=get('ex_cost');
+ const internal=get('ex_internal'),freight=get('ex_freight');
+ const insurance=get('ex_insurance'),fx=get('ex_fx');
+ positive(qty,'Quantidade'); positive(fx,'Câmbio');
+ const revenue=qty*price*fx;
+ const total=qty*cost+internal+(freight+insurance)*fx;
+ const profit=revenue-total;
+ render('ex_result',[
+ ['Receita total USD',usd(qty*price)],
+ ['Receita convertida BRL',brl(revenue)],
+ ['Custo total BRL',brl(total)],
+ ['Custo por unidade BRL',brl(total/qty)],
+ ['Preço mínimo por unidade USD',usd(total/qty/fx)],
+ ['Lucro projetado BRL',brl(profit)],
+ ['Margem sobre receita',revenue?fmt(profit/revenue*100)+'%':'Indefinida']
+ ]);
+});
+}
+
+const incoterms={
+EXW:['Ex Works','Qualquer modal','Comprador','Comprador','Na disponibilização no local nomeado','Comprador','Comprador'],
+FCA:['Free Carrier','Qualquer modal','Comprador','Comprador','Na entrega ao transportador no ponto nomeado','Vendedor','Comprador'],
+FAS:['Free Alongside Ship','Marítimo/hidroviário','Comprador','Comprador','Ao lado do navio no porto de embarque','Vendedor','Comprador'],
+FOB:['Free On Board','Marítimo/hidroviário','Comprador','Comprador','Quando colocada a bordo do navio','Vendedor','Comprador'],
+CFR:['Cost and Freight','Marítimo/hidroviário','Vendedor','Comprador','Quando colocada a bordo do navio','Vendedor','Comprador'],
+CIF:['Cost Insurance and Freight','Marítimo/hidroviário','Vendedor','Vendedor','Quando colocada a bordo do navio','Vendedor','Comprador'],
+CPT:['Carriage Paid To','Qualquer modal','Vendedor','Comprador','Na entrega ao transportador contratado','Vendedor','Comprador'],
+CIP:['Carriage and Insurance Paid To','Qualquer modal','Vendedor','Vendedor','Na entrega ao transportador contratado','Vendedor','Comprador'],
+DAP:['Delivered at Place','Qualquer modal','Vendedor','Comprador','No destino, pronta para descarregar','Vendedor','Comprador'],
+DPU:['Delivered at Place Unloaded','Qualquer modal','Vendedor','Comprador','No destino, após descarregar','Vendedor','Comprador'],
+DDP:['Delivered Duty Paid','Qualquer modal','Vendedor','Comprador','No destino, pronta para descarregar','Vendedor','Vendedor']
+};
+function calcIncoterm(){
+ const term=document.getElementById('in_term').value;
+ const d=incoterms[term];
+ render('in_result',[
+ ['Incoterm',term],
+ ['Significado',d[0]],
+ ['Modal permitido',d[1]],
+ ['Quem contrata/paga o transporte principal',d[2]],
+ ['Quem deve providenciar seguro',d[3]+(d[3]==='Comprador'?' (não necessariamente obrigatório)':'')],
+ ['Transferência do risco',d[4]],
+ ['Despacho de exportação',d[5]],
+ ['Despacho de importação',d[6]]
+ ]);
+}
+
+function calcModes(){
+safely('mo_result',()=>{
+ const cargo=get('mo_value'),rate=get('mo_rate')/100;
+ const options=[
+ ['Marítimo',get('mo_sea'),get('mo_seadays')],
+ ['Aéreo',get('mo_air'),get('mo_airdays')],
+ ['Rodoviário',get('mo_road'),get('mo_roaddays')],
+ ['Ferroviário',get('mo_rail'),get('mo_raildays')]
+ ];
+ const calculated=options.map(x=>({
+ name:x[0],days:x[2],cost:x[1]+cargo*rate*x[2]
+ }));
+ const best=calculated.reduce((a,b)=>a.cost<=b.cost?a:b);
+ render('mo_result',[
+ ...calculated.map(x=>[x.name+' ('+fmt(x.days)+' dias)',usd(x.cost)]),
+ ['Menor custo entre as opções inseridas',best.name],
+ ['Critério','Frete + (Valor da carga × taxa diária × dias)']
+ ]);
+});
+}
+
+function calcAnalysis(){
+safely('an_result',()=>{
+ const qty=get('an_qty'),total=get('an_cost'),price=get('an_price');
+ const tax=get('an_tax')/100,comm=get('an_comm')/100;
+ const extra=get('an_extra'),fixed=get('an_fixed');
+ positive(qty,'Quantidade');
+ const unit=total/qty;
+ const variable=unit+price*(tax+comm)+extra;
+ const contribution=price-variable;
+ const revenue=qty*price;
+ const profit=contribution*qty-fixed;
+ const breakEven=contribution>0?fmt(Math.ceil(fixed/contribution)):'Não atingível';
+ render('an_result',[
+ ['Custo unitário',brl(unit)],
+ ['Receita bruta',brl(revenue)],
+ ['Despesas e custos variáveis unitários',brl(variable)],
+ ['Margem de contribuição unitária',brl(contribution)],
+ ['Margem de contribuição (%)',price?fmt(contribution/price*100)+'%':'Indefinida'],
+ ['Markup sobre custo unitário',unit?fmt((price/unit-1)*100)+'%':'Indefinido'],
+ ['Ponto de equilíbrio (unidades/kg)',breakEven],
+ ['Resultado gerencial estimado',brl(profit)]
+ ]);
+});
+}
+
+calcImport();
+calcExport();
+calcIncoterm();
+calcModes();
+calcAnalysis();
+</script>
 </body>
 </html>
