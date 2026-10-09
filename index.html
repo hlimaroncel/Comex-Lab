@@ -2270,5 +2270,321 @@ header p {
 </script>
 <!-- FIM DA CORREÇÃO -->
 
+<!-- COMEX-LAB PREMIUM — PACOTE 3: PDF IMPORTAÇÃO -->
+<style>
+.comex-pdf-button {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:10px 5px 10px 0;
+  padding:13px 19px;
+  background:#292A29;
+  border:1px solid #292A29;
+  border-radius:9px;
+  color:white;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.comex-pdf-button:hover {
+  background:#494B47;
+}
+.comex-pdf-button:disabled {
+  background:#E9E9E6;
+  border-color:#E9E9E6;
+  color:#8A8B86;
+  cursor:not-allowed;
+}
+</style>
+
+<script>
+(function(){
+  if(window.comexPdfImportReady)return;
+  window.comexPdfImportReady=true;
+
+  const section=document.getElementById("importacao");
+  const result=document.getElementById("im_result");
+  const calc=section?.querySelector("button.calculate");
+
+  if(!section||!result||!calc)return;
+
+  let reportReady=false;
+
+  const pdfButton=document.createElement("button");
+  pdfButton.type="button";
+  pdfButton.className="comex-pdf-button";
+  pdfButton.textContent="Gerar relatório em PDF";
+  pdfButton.disabled=true;
+  calc.after(pdfButton);
+
+  function validResult(){
+    return Boolean(
+      result.querySelector("table") &&
+      [...result.querySelectorAll("tr")].some(tr=>
+        tr.cells[0]?.textContent.trim()===
+        "Custo total estimado"
+      )
+    );
+  }
+
+  function updateReady(){
+    reportReady=validResult();
+    pdfButton.disabled=!reportReady;
+  }
+
+  // Sempre que a operação mudar, exigir novo cálculo.
+  section.querySelectorAll("input,select").forEach(field=>{
+    field.addEventListener("input",()=>{
+      reportReady=false;
+      pdfButton.disabled=true;
+    });
+    field.addEventListener("change",()=>{
+      reportReady=false;
+      pdfButton.disabled=true;
+    });
+  });
+
+  // Detectar resultados produzidos pelo cálculo original.
+  const observer=new MutationObserver(updateReady);
+  observer.observe(result,{
+    childList:true,
+    subtree:true
+  });
+
+  // Limpar ou iniciar nova simulação invalida o relatório.
+  section.querySelectorAll(
+    ".btn-clear,.btn-new"
+  ).forEach(button=>{
+    button.addEventListener("click",()=>{
+      reportReady=false;
+      pdfButton.disabled=true;
+    });
+  });
+
+  // Construir elementos imprimíveis sem copiar HTML
+  // digitado pelo usuário.
+  function add(parent,tag,value,className){
+    const el=parent.ownerDocument.createElement(tag);
+    if(className)el.className=className;
+    if(value!==undefined)el.textContent=String(value);
+    parent.append(el);
+    return el;
+  }
+
+  function valueOf(id){
+    const el=document.getElementById(id);
+    return el ? el.value : "";
+  }
+
+  function rowsFromResult(){
+    return [...result.querySelectorAll("table tr")]
+      .filter(tr=>tr.cells.length>=2)
+      .map(tr=>[
+        tr.cells[0].textContent.trim(),
+        tr.cells[1].textContent.trim()
+      ]);
+  }
+
+  function moneyToNumber(text){
+    let s=String(text).replace(/[^0-9,.-]/g,"");
+    if(s.includes(",")){
+      s=s.replace(/\./g,"").replace(",",".");
+    }
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
+  }
+
+  function printReport(){
+    if(!reportReady||!validResult()){
+      alert("Calcule a importação antes de gerar o PDF.");
+      return;
+    }
+
+    const resultRows=rowsFromResult();
+    const lookup=name=>
+      resultRows.find(r=>r[0]===name)?.[1]||"—";
+
+    const country=document.getElementById(
+      "im_country"
+    )?.value||"Não informado";
+
+    const term=valueOf("im_term");
+    const date=new Date().toLocaleString("pt-BR");
+
+    // Abrir a janela diretamente no clique.
+    const printWindow=window.open(
+      "","_blank","width=900,height=850"
+    );
+
+    if(!printWindow){
+      alert(
+        "O navegador bloqueou a janela do relatório. " +
+        "Permita pop-ups para o Comex-Lab e tente novamente."
+      );
+      return;
+    }
+
+    const doc=printWindow.document;
+    doc.open();
+    doc.write(
+      '<!DOCTYPE html><html lang="pt-BR">' +
+      '<head><meta charset="UTF-8">' +
+      '<title>Comex-Lab - Relatório de Importação</title>' +
+      '<style>' +
+      '@page{size:A4;margin:15mm}' +
+      '*{box-sizing:border-box}' +
+      'body{font-family:Arial,sans-serif;color:#292A29;' +
+      'margin:0;font-size:11px;line-height:1.5}' +
+      'h1{font-size:24px;margin:0;letter-spacing:-1px}' +
+      'h2{font-size:14px;margin:23px 0 10px;' +
+      'border-bottom:1px solid #DDD;padding-bottom:6px}' +
+      '.muted{color:#777873}' +
+      '.top{border-bottom:2px solid #292A29;' +
+      'padding-bottom:14px;margin-bottom:18px}' +
+      '.info{display:grid;grid-template-columns:1fr 1fr;' +
+      'gap:10px}' +
+      '.item{background:#F7F7F5;padding:10px;' +
+      'border:1px solid #E4E4E0;border-radius:6px}' +
+      '.item small{display:block;color:#777873}' +
+      '.item strong{font-size:12px}' +
+      '.summary{display:grid;grid-template-columns:' +
+      'repeat(3,1fr);gap:8px;margin:15px 0}' +
+      '.kpi{border:1px solid #E4E4E0;' +
+      'padding:12px;background:#F7F7F5}' +
+      '.kpi small{display:block;color:#777873}' +
+      '.kpi strong{font-size:15px;display:block;' +
+      'margin-top:5px}' +
+      'table{width:100%;border-collapse:collapse}' +
+      'td{padding:6px 8px;border-bottom:1px solid #E8E8E5}' +
+      'td:last-child{text-align:right;font-weight:bold}' +
+      '.bar-row{margin:10px 0;break-inside:avoid}' +
+      '.bar-label{display:flex;justify-content:space-between;' +
+      'gap:10px;margin-bottom:4px}' +
+      '.track{height:11px;background:#E8E8E5;' +
+      'border-radius:8px;overflow:hidden}' +
+      '.fill{height:100%;background:#555752}' +
+      '.note{background:#F7F7F5;border-left:3px solid ' +
+      '#777873;padding:12px;margin-top:15px}' +
+      '.print-actions{margin:20px 0}' +
+      '.print-actions button{background:#292A29;color:white;' +
+      'border:0;padding:12px 18px;cursor:pointer}' +
+      '@media print{.print-actions{display:none}' +
+      'h2,.info,.summary,.note{break-inside:avoid}}' +
+      '</style></head><body></body></html>'
+    );
+    doc.close();
+
+    const body=doc.body;
+
+    const top=add(body,"div",undefined,"top");
+    add(top,"h1","COMEX-LAB");
+    add(top,"div","RELATÓRIO DE SIMULAÇÃO — IMPORTAÇÃO");
+    add(top,"div","Gerado em "+date,"muted");
+
+    add(body,"h2","1. Dados da operação");
+
+    const info=add(body,"div",undefined,"info");
+    const inputs=[
+      ["País de origem",country],
+      ["Incoterm de referência",term],
+      ["Mercadoria (USD)",valueOf("im_goods")],
+      ["Quantidade (kg)",valueOf("im_qty")],
+      ["Câmbio (R$/USD)",valueOf("im_fx")],
+      ["Frete internacional (USD)",valueOf("im_freight")],
+      ["Seguro internacional (USD)",valueOf("im_insurance")],
+      ["II (%)",valueOf("im_ii")],
+      ["IPI (%)",valueOf("im_ipi")],
+      ["PIS-Importação (%)",valueOf("im_pis")],
+      ["COFINS-Importação (%)",valueOf("im_cofins")],
+      ["ICMS (%)",valueOf("im_icms")],
+      ["Despesas locais (R$)",valueOf("im_local")],
+      ["Margem desejada (%)",valueOf("im_margin")]
+    ];
+
+    inputs.forEach(([name,value])=>{
+      const item=add(info,"div",undefined,"item");
+      add(item,"small",name);
+      add(item,"strong",value);
+    });
+
+    add(body,"h2","2. Indicadores principais");
+
+    const summary=add(body,"div",undefined,"summary");
+    [
+      "Custo total estimado",
+      "Custo por kg",
+      "Total de tributos estimados"
+    ].forEach(name=>{
+      const el=add(summary,"div",undefined,"kpi");
+      add(el,"small",name);
+      add(el,"strong",lookup(name));
+    });
+
+    add(body,"h2","3. Detalhamento financeiro");
+
+    const table=add(body,"table");
+    resultRows.forEach(([name,value])=>{
+      const tr=add(table,"tr");
+      add(tr,"td",name);
+      add(tr,"td",value);
+    });
+
+    add(body,"h2","4. Composição de custos");
+
+    const chartValues=[
+      ["Valor aduaneiro CIF (simplificado)",
+        lookup("Valor aduaneiro CIF (simplificado)")],
+      ["Total de tributos estimados",
+        lookup("Total de tributos estimados")],
+      ["Outras despesas locais",
+        lookup("Outras despesas locais")]
+    ];
+
+    const total=chartValues.reduce(
+      (sum,row)=>sum+Math.max(0,moneyToNumber(row[1])),0
+    );
+
+    chartValues.forEach(([name,value])=>{
+      const numeric=Math.max(0,moneyToNumber(value));
+      const pct=total>0?numeric/total*100:0;
+
+      const line=add(body,"div",undefined,"bar-row");
+      const label=add(line,"div",undefined,"bar-label");
+      add(label,"span",name);
+      add(label,"strong",pct.toLocaleString(
+        "pt-BR",{maximumFractionDigits:1}
+      )+"%");
+
+      const track=add(line,"div",undefined,"track");
+      const fill=add(track,"div",undefined,"fill");
+      fill.style.width=pct+"%";
+    });
+
+    add(body,"h2","5. Observações");
+
+    add(body,"div",
+      "Simulação educacional simplificada. Os valores " +
+      "não constituem cotação, cálculo tributário oficial " +
+      "nem orientação aduaneira. Confira NCM, base de " +
+      "cálculo, origem, legislação aplicável, benefícios " +
+      "e despesas efetivas antes de realizar uma operação.",
+      "note"
+    );
+
+    const actions=add(body,"div",undefined,"print-actions");
+    const button=add(actions,"button","Imprimir / Salvar PDF");
+    button.onclick=()=>printWindow.print();
+
+    // A janela permanece aberta para revisão antes
+    // de salvar o relatório.
+    printWindow.focus();
+  }
+
+  pdfButton.addEventListener("click",printReport);
+  updateReady();
+})();
+</script>
+<!-- FIM DO PACOTE 3 -->
+
 </body>
 </html>
