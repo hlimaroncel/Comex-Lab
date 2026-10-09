@@ -2182,5 +2182,93 @@ header p {
 </script>
 <!-- FIM DAS BANDEIRAS DISCRETAS -->
 
+<!-- COMEX-LAB — CORREÇÃO FINAL DE BANDEIRAS -->
+<style>
+/* Remover completamente o quadro duplicado */
+.comex-country-display {
+  display:none !important;
+}
+
+/* Campo com bandeira integrada */
+.comex-country-inline {
+  position:relative !important;
+  width:100% !important;
+}
+
+.comex-country-inline select {
+  width:100% !important;
+  padding-left:46px !important;
+}
+
+.comex-country-inline-flag {
+  position:absolute !important;
+  display:block;
+  left:13px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  width:22px !important;
+  height:15px !important;
+  object-fit:cover !important;
+  border:1px solid #E4E4E0;
+  border-radius:2px;
+  pointer-events:none;
+  z-index:2;
+}
+</style>
+
+<script>
+(function(){
+  ["im_country","ex_country"].forEach(id=>{
+    const select=document.getElementById(id);
+    if(!select)return;
+
+    const wrapper=select.closest(".comex-country-inline");
+    if(!wrapper)return;
+
+    const image=wrapper.querySelector(
+      ".comex-country-inline-flag"
+    );
+    if(!image)return;
+
+    const map={
+      "Brasil":"br",
+      "China":"cn",
+      "Ucrânia":"ua",
+      "Portugal":"pt",
+      "Estados Unidos":"us",
+      "Índia":"in"
+    };
+
+    // Aproveitar o endereço de bandeira já
+    // configurado pelo pacote anterior.
+    function refresh(){
+      const country=select.value;
+      const code=map[country];
+
+      if(code){
+        image.src=
+          "https://flagcdn.com/w40/"+code+".png";
+      }
+
+      // Garantir que o seletor tenha espaço
+      // reservado para a bandeira.
+      select.style.setProperty(
+        "padding-left","46px","important"
+      );
+
+      // Remover quadros repetidos próximos ao campo.
+      const parent=wrapper.parentElement;
+      parent.querySelectorAll(
+        ".comex-country-display"
+      ).forEach(el=>el.remove());
+    }
+
+    select.addEventListener("change",refresh);
+    refresh();
+  });
+})();
+</script>
+<!-- FIM DA CORREÇÃO -->
+
 </body>
 </html>
