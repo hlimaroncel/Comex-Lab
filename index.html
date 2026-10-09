@@ -501,5 +501,25 @@ calcAnalysis();
 </script>
 <!-- FIM DOS PAÍSES -->
 
+<!-- COMEX-LAB: INICIAR SIMULADORES ZERADOS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  // Zerar todos os campos numéricos
+  document.querySelectorAll('input[type="number"]')
+    .forEach(function(campo) {
+      campo.value = "0";
+    });
+
+  // Limpar os resultados anteriores
+  document.querySelectorAll(".result")
+    .forEach(function(resultado) {
+      resultado.innerHTML = "";
+    });
+
+});
+</script>
+<!-- FIM DA CONFIGURACAO -->
+
 </body>
 </html>
