@@ -391,5 +391,115 @@ calcIncoterm();
 calcModes();
 calcAnalysis();
 </script>
+  
+<!-- COMEX-LAB: PAÍSES PARA IMPORTAÇÃO E EXPORTAÇÃO -->
+<script>
+(function () {
+  const paises = {
+    "América do Sul": [
+      "Brasil", "Argentina", "Bolívia", "Chile",
+      "Colômbia", "Equador", "Paraguai", "Peru",
+      "Uruguai", "Venezuela", "Guiana", "Suriname"
+    ],
+    "América do Norte e Central": [
+      "Estados Unidos", "Canadá", "México",
+      "Costa Rica", "Guatemala", "Panamá",
+      "República Dominicana", "El Salvador",
+      "Honduras", "Nicarágua"
+    ],
+    "Europa": [
+      "Alemanha", "Portugal", "Itália", "França",
+      "Espanha", "Reino Unido", "Países Baixos",
+      "Bélgica", "Suíça", "Áustria", "Polônia",
+      "Turquia", "Suécia", "Noruega", "Dinamarca",
+      "Finlândia", "Irlanda", "Grécia",
+      "República Tcheca", "Romênia", "Hungria",
+      "Ucrânia", "Rússia"
+    ],
+    "Ásia": [
+      "China", "Índia", "Japão", "Coreia do Sul",
+      "Vietnã", "Bangladesh", "Paquistão",
+      "Indonésia", "Tailândia", "Malásia",
+      "Singapura", "Filipinas", "Taiwan",
+      "Camboja", "Sri Lanka", "Emirados Árabes Unidos",
+      "Arábia Saudita", "Israel", "Hong Kong"
+    ],
+    "África": [
+      "África do Sul", "Egito", "Marrocos",
+      "Nigéria", "Quênia", "Tunísia",
+      "Etiópia", "Angola", "Moçambique",
+      "Gana", "Argélia"
+    ],
+    "Oceania": [
+      "Austrália", "Nova Zelândia"
+    ]
+  };
+
+  function criarSeletor(id, titulo, inicial) {
+    const div = document.createElement("div");
+    const label = document.createElement("label");
+    const select = document.createElement("select");
+
+    label.htmlFor = id;
+    label.textContent = titulo;
+    select.id = id;
+
+    Object.entries(paises).forEach(([continente, lista]) => {
+      const grupo = document.createElement("optgroup");
+      grupo.label = continente;
+
+      lista.forEach(pais => {
+        const option = document.createElement("option");
+        option.value = pais;
+        option.textContent = pais;
+        if (pais === inicial) option.selected = true;
+        grupo.appendChild(option);
+      });
+
+      select.appendChild(grupo);
+    });
+
+    div.appendChild(label);
+    div.appendChild(select);
+    return div;
+  }
+
+  // Substituir seletor antigo de importação
+  const importFields = document.querySelector(
+    "#importacao .fields"
+  );
+
+  if (importFields) {
+    const antigo = importFields.firstElementChild;
+
+    if (antigo) {
+      antigo.replaceWith(
+        criarSeletor(
+          "im_country",
+          "País de origem",
+          "China"
+        )
+      );
+    }
+  }
+
+  // Adicionar país de destino na exportação
+  const exportFields = document.querySelector(
+    "#exportacao .fields"
+  );
+
+  if (exportFields && !document.getElementById("ex_country")) {
+    exportFields.prepend(
+      criarSeletor(
+        "ex_country",
+        "País de destino",
+        "Estados Unidos"
+      )
+    );
+  }
+})();
+</script>
+<!-- FIM DOS PAÍSES -->
+
 </body>
 </html>
