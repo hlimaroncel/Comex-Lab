@@ -1077,5 +1077,189 @@ footer { grid-column:2; }
 </script>
 <!-- FIM DA INTERFACE EXECUTIVO PREMIUM V2 -->
 
+<!-- COMEX-LAB — REFINAMENTO PREMIUM V3 -->
+<style>
+/* Cabeçalho e identidade */
+html, body {
+  max-width:100%;
+  overflow-x:hidden;
+}
+header {
+  width:100%;
+  padding:25px max(25px, calc((100vw - 1370px)/2));
+  box-sizing:border-box;
+}
+header h1 {
+  font-size:27px;
+  font-weight:800;
+  line-height:1.25;
+  letter-spacing:-0.8px;
+  margin:0;
+}
+header p {
+  font-size:13px;
+  margin:7px 0 0;
+}
+
+/* Página inicial */
+#home {
+  padding:36px;
+}
+#home h2 {
+  font-size:29px;
+  font-weight:800;
+  line-height:1.3;
+  margin-bottom:14px;
+}
+#home .description {
+  font-size:15px;
+  line-height:1.75;
+  max-width:740px;
+  color:#6C6D68;
+}
+
+/* Distribuição dos cartões */
+#home .home-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:17px;
+  margin-top:30px;
+}
+#home .home-card {
+  min-height:185px;
+  padding:25px;
+  border:1px solid #E4E4E0;
+  border-radius:14px;
+  background:#FFFFFF;
+  transition:transform .2s,box-shadow .2s;
+}
+#home .home-card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 8px 22px rgba(0,0,0,.05);
+}
+#home .home-card b {
+  font-size:17px;
+  line-height:1.4;
+}
+#home .home-card small {
+  font-size:13px;
+  line-height:1.65;
+  color:#777873;
+}
+#home .home-icon {
+  font-size:27px;
+  margin-bottom:22px;
+}
+
+/* Títulos dos simuladores */
+.panel h2 {
+  font-size:26px;
+  line-height:1.3;
+}
+.panel .description {
+  font-size:14px;
+  line-height:1.7;
+}
+.fields label {
+  font-size:13px;
+}
+.result td {
+  font-size:14px;
+  line-height:1.5;
+}
+
+/* Botão de início rápido */
+.comex-quick-start {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  gap:9px;
+  margin-top:24px;
+  padding:14px 22px;
+  border:1px solid #292A29;
+  border-radius:10px;
+  background:#292A29;
+  color:#FFFFFF;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .2s;
+}
+.comex-quick-start:hover {
+  background:#454743;
+}
+
+/* Responsividade */
+@media(max-width:1100px) {
+  #home .home-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:650px) {
+  header {
+    padding:22px 18px;
+  }
+  #home {
+    padding:20px;
+  }
+  #home h2 {
+    font-size:23px;
+  }
+  #home .home-grid {
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  #home .home-card {
+    min-height:140px;
+  }
+  .comex-quick-start {
+    width:100%;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const home = document.getElementById("home");
+  if (!home) return;
+
+  // Evitar inserir o botão duas vezes
+  if (document.getElementById("comex-quick-start")) {
+    return;
+  }
+
+  const intro = home.querySelector(".description");
+  if (!intro) return;
+
+  // Apresentação institucional
+  intro.textContent =
+    "Explore uma plataforma educacional dedicada " +
+    "ao Comércio Exterior. Simule operações de " +
+    "importação, exportação, logística internacional " +
+    "e análise comercial com ferramentas práticas " +
+    "e resultados detalhados.";
+
+  // Acesso rápido ao simulador de importação
+  const button = document.createElement("button");
+  button.id = "comex-quick-start";
+  button.className = "comex-quick-start";
+  button.type = "button";
+  button.textContent = "Iniciar simulação de importação →";
+
+  button.addEventListener("click", function() {
+    const target = document.querySelector(
+      'nav button[data-module="importacao"]'
+    );
+
+    if (target) {
+      target.click();
+    }
+  });
+
+  intro.insertAdjacentElement("afterend", button);
+})();
+</script>
+<!-- FIM DO REFINAMENTO PREMIUM V3 -->
+
 </body>
 </html>
