@@ -1269,5 +1269,385 @@ header p {
 </style>
 <!-- FIM DO AJUSTE -->
 
+<!-- COMEX-LAB PREMIUM — PACOTE 1 -->
+<style>
+/* Indicadores da página inicial */
+.comex-overview {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin:25px 0 10px;
+}
+.comex-overview-card {
+  background:#F7F7F5;
+  border:1px solid #E4E4E0;
+  border-radius:12px;
+  padding:21px;
+}
+.comex-overview-card strong {
+  display:block;
+  color:#292A29;
+  font-size:24px;
+  font-weight:800;
+}
+.comex-overview-card span {
+  display:block;
+  margin-top:8px;
+  color:#777873;
+  font-size:12px;
+}
+
+/* Navegação entre etapas */
+.comex-steps {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:25px;
+  padding-bottom:18px;
+  border-bottom:1px solid #E4E4E0;
+}
+.comex-step-button {
+  background:#F7F7F5;
+  color:#545651;
+  border:1px solid #E4E4E0;
+  border-radius:9px;
+  padding:12px;
+  font-size:12px;
+  font-weight:700;
+}
+.comex-step-button.selected {
+  background:#292A29;
+  color:#FFFFFF;
+  border-color:#292A29;
+}
+.comex-step-panel {
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:17px;
+  align-items:start;
+}
+.comex-step-panel[hidden] {
+  display:none !important;
+}
+.comex-step-panel .field-group-heading {
+  grid-column:1/-1;
+  margin-top:0;
+  border-top:0;
+}
+.comex-step-actions {
+  grid-column:1/-1;
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin:8px 0 0;
+}
+.comex-step-actions button {
+  background:#FFFFFF;
+  border:1px solid #D7D8D3;
+  color:#292A29;
+  padding:11px 17px;
+  border-radius:9px;
+}
+.comex-step-actions button.next {
+  background:#292A29;
+  border-color:#292A29;
+  color:#FFFFFF;
+}
+
+/* Explicações educativas */
+.comex-help {
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:19px;
+  height:19px;
+  padding:0;
+  margin-left:7px;
+  border:1px solid #B8B9B4;
+  border-radius:50%;
+  background:#FFFFFF;
+  color:#555752;
+  font-size:11px;
+  cursor:pointer;
+}
+.comex-help-box {
+  background:#F7F7F5;
+  border:1px solid #DEDFDA;
+  padding:15px;
+  margin:12px 0;
+  border-radius:9px;
+  color:#454743;
+  font-size:13px;
+  line-height:1.7;
+}
+.comex-help-box[hidden] {
+  display:none !important;
+}
+
+@media(max-width:1000px) {
+  .comex-step-panel {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:650px) {
+  .comex-overview {
+    grid-template-columns:1fr;
+  }
+  .comex-step-panel {
+    grid-template-columns:1fr;
+  }
+  .comex-steps {
+    display:grid;
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script>
+(function() {
+  if (document.getElementById("comex-package-one")) return;
+
+  const marker=document.createElement("span");
+  marker.id="comex-package-one";
+  marker.hidden=true;
+  document.body.appendChild(marker);
+
+  /* 1. Indicadores na página inicial */
+  const home=document.getElementById("home");
+
+  if(home && !home.querySelector(".comex-overview")) {
+    const indicators=[
+      ["05","Simuladores disponíveis"],
+      ["Global","Mercados internacionais"],
+      ["Livre","Acesso sem cadastro"]
+    ];
+
+    const overview=document.createElement("div");
+    overview.className="comex-overview";
+
+    indicators.forEach(([value,label])=>{
+      const card=document.createElement("div");
+      card.className="comex-overview-card";
+
+      const number=document.createElement("strong");
+      number.textContent=value;
+
+      const description=document.createElement("span");
+      description.textContent=label;
+
+      card.append(number,description);
+      overview.appendChild(card);
+    });
+
+    const cards=home.querySelector(".home-grid");
+    if(cards)cards.before(overview);
+  }
+
+  /* 2. Navegação em etapas */
+  const sections=[
+    "importacao",
+    "exportacao",
+    "modais",
+    "analise"
+  ];
+
+  sections.forEach(id=>{
+    const section=document.getElementById(id);
+    if(!section)return;
+
+    const fields=section.querySelector(".fields");
+    if(!fields || fields.dataset.stepsReady)return;
+
+    const children=[...fields.children];
+    const groups=[];
+    let current=null;
+
+    children.forEach(node=>{
+      if(node.classList.contains("field-group-heading")) {
+        current={heading:node,items:[]};
+        groups.push(current);
+      }else{
+        if(!current){
+          current={heading:null,items:[]};
+          groups.push(current);
+        }
+        current.items.push(node);
+      }
+    });
+
+    if(groups.length<2)return;
+    fields.dataset.stepsReady="true";
+
+    const nav=document.createElement("div");
+    nav.className="comex-steps";
+
+    const panels=[];
+    const buttons=[];
+
+    // Reconstruir apenas o layout dos campos.
+    // Todos os inputs mantêm seus IDs e valores.
+    fields.replaceChildren();
+
+    groups.forEach((group,index)=>{
+      const title=group.heading
+        ?group.heading.textContent.trim()
+        :"Dados da operação";
+
+      const btn=document.createElement("button");
+      btn.type="button";
+      btn.className="comex-step-button";
+      btn.textContent=title;
+      btn.setAttribute("aria-label","Ir para "+title);
+      nav.appendChild(btn);
+      buttons.push(btn);
+
+      const panel=document.createElement("div");
+      panel.className="comex-step-panel";
+
+      if(group.heading)panel.appendChild(group.heading);
+      group.items.forEach(item=>panel.appendChild(item));
+
+      const actions=document.createElement("div");
+      actions.className="comex-step-actions";
+
+      if(index>0){
+        const back=document.createElement("button");
+        back.type="button";
+        back.textContent="← Voltar";
+        back.onclick=()=>activate(index-1);
+        actions.appendChild(back);
+      }
+
+      if(index<groups.length-1){
+        const next=document.createElement("button");
+        next.type="button";
+        next.className="next";
+        next.textContent="Próxima etapa →";
+        next.onclick=()=>activate(index+1);
+        actions.appendChild(next);
+      }else{
+        const finish=document.createElement("button");
+        finish.type="button";
+        finish.className="next";
+        finish.textContent="Ir para calcular ↓";
+        finish.onclick=()=>{
+          const calculate=section.querySelector(
+            "button.calculate"
+          );
+          if(calculate){
+            calculate.scrollIntoView({
+              behavior:"smooth",
+              block:"center"
+            });
+            calculate.focus();
+          }
+        };
+        actions.appendChild(finish);
+      }
+
+      panel.appendChild(actions);
+      fields.appendChild(panel);
+      panels.push(panel);
+
+      btn.onclick=()=>activate(index);
+    });
+
+    function activate(index){
+      panels.forEach((panel,i)=>{
+        panel.hidden=i!==index;
+        buttons[i].classList.toggle(
+          "selected",i===index
+        );
+        buttons[i].setAttribute(
+          "aria-pressed",String(i===index)
+        );
+      });
+    }
+
+    fields.before(nav);
+    activate(0);
+  });
+
+  /* 3. Glossário educacional */
+  const glossary=[
+    [/FOB/i,
+     "FOB: o vendedor entrega a mercadoria a bordo do navio no porto de embarque. O risco passa ao comprador nesse momento."],
+    [/CIF/i,
+     "CIF: o vendedor contrata o transporte e seguro até o porto de destino, mas o risco é transferido no embarque."],
+    [/EXW/i,
+     "EXW: a mercadoria é disponibilizada no local nomeado. O comprador assume grande parte das responsabilidades."],
+    [/Incoterm/i,
+     "Incoterms são regras internacionais que definem obrigações, custos e transferência de riscos entre comprador e vendedor."],
+    [/Câmbio/i,
+     "Câmbio é a taxa de conversão entre moedas. Exemplo: US$ 100 × R$ 5,30 = R$ 530."],
+    [/ICMS/i,
+     "ICMS é um imposto estadual. Na importação, sua base de cálculo depende das regras legais aplicáveis."],
+    [/IPI/i,
+     "IPI é o Imposto sobre Produtos Industrializados. A alíquota depende da classificação fiscal e da operação."],
+    [/PIS|COFINS/i,
+     "PIS e COFINS são contribuições federais. A apuração real pode ter bases e regras específicas."],
+    [/Frete/i,
+     "Frete é o custo de transporte. Evite somá-lo novamente caso já esteja incluído no valor informado da mercadoria."],
+    [/Seguro/i,
+     "Seguro é a cobertura contratada contra determinados riscos da operação logística."],
+    [/Margem/i,
+     "Margem sobre vendas é a relação entre o resultado e o preço de venda."],
+    [/Markup/i,
+     "Markup relaciona preço de venda e custo. Não é equivalente à margem sobre vendas."],
+    [/Landed cost/i,
+     "Landed cost é o custo total da mercadoria colocada no destino, considerando as despesas aplicáveis."]
+  ];
+
+  document.querySelectorAll(
+    ".panel label,.field-group-heading"
+  ).forEach(label=>{
+    if(label.querySelector(".comex-help"))return;
+
+    const match=glossary.find(([pattern])=>
+      pattern.test(label.textContent)
+    );
+
+    if(!match)return;
+
+    // Remover dicas visuais antigas para evitar duplicidade
+    label.querySelectorAll(".help-icon").forEach(
+      old=>old.remove()
+    );
+
+    const help=document.createElement("button");
+    help.type="button";
+    help.className="comex-help";
+    help.textContent="?";
+    help.title="Clique para ver a explicação";
+    help.setAttribute("aria-label","Ver explicação");
+
+    const explanation=document.createElement("div");
+    explanation.className="comex-help-box";
+    explanation.textContent=match[1];
+    explanation.hidden=true;
+
+    const parent=label.parentElement;
+    if(!parent)return;
+
+    label.appendChild(help);
+    parent.appendChild(explanation);
+
+    help.addEventListener("click",event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      explanation.hidden=!explanation.hidden;
+      help.setAttribute(
+        "aria-expanded",
+        String(!explanation.hidden)
+      );
+    });
+  });
+
+})();
+</script>
+<!-- FIM DO PACOTE 1 -->
+
 </body>
 </html>
