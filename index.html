@@ -1649,5 +1649,430 @@ header p {
 </script>
 <!-- FIM DO PACOTE 1 -->
 
+<!-- COMEX-LAB PREMIUM — PACOTE 2 -->
+<style>
+.comex-country-display {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+  padding:8px 11px;
+  background:#F7F7F5;
+  border:1px solid #E4E4E0;
+  border-radius:8px;
+  color:#555752;
+  font-size:12px;
+}
+.comex-country-flag {font-size:23px;line-height:1.3}
+
+.comex-visuals {
+  margin:20px 0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.comex-visual-card {
+  border:1px solid #E4E4E0;
+  background:white;
+  padding:19px;
+  border-radius:13px;
+  min-width:0;
+}
+.comex-visual-card h3 {
+  color:#292A29;
+  font-size:15px;
+  margin:0 0 16px;
+}
+.comex-visual-row {
+  margin:13px 0;
+  font-size:12px;
+}
+.comex-visual-line {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+.comex-visual-line span:first-child {
+  color:#62645F;
+}
+.comex-visual-line strong {
+  color:#292A29;
+  font-variant-numeric:tabular-nums;
+}
+.comex-visual-track {
+  background:#EAEAE6;
+  height:12px;
+  overflow:hidden;
+  border-radius:20px;
+}
+.comex-visual-fill {
+  background:#51534F;
+  height:100%;
+  border-radius:20px;
+}
+.comex-donut-layout {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:22px;
+}
+.comex-donut-svg {
+  width:175px;
+  height:175px;
+  flex-shrink:0;
+}
+.comex-donut-legend {
+  flex:1;
+  min-width:130px;
+}
+.comex-legend-row {
+  display:flex;
+  gap:9px;
+  align-items:flex-start;
+  margin:10px 0;
+  font-size:12px;
+}
+.comex-legend-swatch {
+  width:11px;
+  height:11px;
+  border-radius:3px;
+  flex-shrink:0;
+  margin-top:3px;
+}
+.comex-chart-note {
+  color:#777873;
+  font-size:11px;
+  line-height:1.5;
+  margin-top:13px;
+}
+@media(max-width:900px) {
+  .comex-visuals {
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script>
+(function(){
+  if(window.comexPackageTwoLoaded)return;
+  window.comexPackageTwoLoaded=true;
+
+  // Bandeiras — relação de nomes e códigos ISO
+  const codes={
+    "Brasil":"BR","Argentina":"AR","Bolívia":"BO",
+    "Chile":"CL","Colômbia":"CO","Equador":"EC",
+    "Paraguai":"PY","Peru":"PE","Uruguai":"UY",
+    "Venezuela":"VE","Guiana":"GY","Suriname":"SR",
+    "Estados Unidos":"US","Canadá":"CA",
+    "México":"MX","Costa Rica":"CR",
+    "Guatemala":"GT","Panamá":"PA",
+    "República Dominicana":"DO","El Salvador":"SV",
+    "Honduras":"HN","Nicarágua":"NI",
+    "Alemanha":"DE","Portugal":"PT",
+    "Itália":"IT","França":"FR",
+    "Espanha":"ES","Reino Unido":"GB",
+    "Países Baixos":"NL","Bélgica":"BE",
+    "Suíça":"CH","Áustria":"AT",
+    "Polônia":"PL","Turquia":"TR",
+    "Suécia":"SE","Noruega":"NO",
+    "Dinamarca":"DK","Finlândia":"FI",
+    "Irlanda":"IE","Grécia":"GR",
+    "República Tcheca":"CZ","Romênia":"RO",
+    "Hungria":"HU","Ucrânia":"UA",
+    "Rússia":"RU","China":"CN",
+    "Índia":"IN","Japão":"JP",
+    "Coreia do Sul":"KR","Vietnã":"VN",
+    "Bangladesh":"BD","Paquistão":"PK",
+    "Indonésia":"ID","Tailândia":"TH",
+    "Malásia":"MY","Singapura":"SG",
+    "Filipinas":"PH","Taiwan":"TW",
+    "Camboja":"KH","Sri Lanka":"LK",
+    "Emirados Árabes Unidos":"AE",
+    "Arábia Saudita":"SA","Israel":"IL",
+    "Hong Kong":"HK","África do Sul":"ZA",
+    "Egito":"EG","Marrocos":"MA",
+    "Nigéria":"NG","Quênia":"KE",
+    "Tunísia":"TN","Etiópia":"ET",
+    "Angola":"AO","Moçambique":"MZ",
+    "Gana":"GH","Argélia":"DZ",
+    "Austrália":"AU","Nova Zelândia":"NZ"
+  };
+
+  function flagFor(name){
+    const code=codes[name];
+    if(!code)return "🌐";
+    return [...code].map(char=>
+      String.fromCodePoint(
+        127397+char.charCodeAt(0)
+      )
+    ).join("");
+  }
+
+  ["im_country","ex_country"].forEach(id=>{
+    const select=document.getElementById(id);
+    if(!select)return;
+
+    const display=document.createElement("div");
+    display.className="comex-country-display";
+
+    const flag=document.createElement("span");
+    flag.className="comex-country-flag";
+    flag.setAttribute("aria-hidden","true");
+
+    const text=document.createElement("span");
+    display.append(flag,text);
+
+    function refresh(){
+      flag.textContent=flagFor(select.value);
+      text.textContent=select.value;
+    }
+
+    select.insertAdjacentElement("afterend",display);
+    select.addEventListener("change",refresh);
+    refresh();
+  });
+
+  // Gráficos financeiros com base nos resultados
+  function amount(value){
+    let s=String(value ?? "");
+    s=s.replace(/[^0-9,.-]/g,"");
+    if(s.includes(",")){
+      s=s.replace(/\./g,"").replace(",",".");
+    }
+    const n=Number(s);
+    return Number.isFinite(n)?n:null;
+  }
+
+  function make(tag,className,text){
+    const el=document.createElement(tag);
+    if(className)el.className=className;
+    if(text!==undefined)el.textContent=text;
+    return el;
+  }
+
+  function card(title){
+    const el=make("div","comex-visual-card");
+    el.append(make("h3","",title));
+    return el;
+  }
+
+  function bars(rows){
+    const box=card("Comparativo financeiro");
+    const max=Math.max(1,...rows.map(r=>
+      Math.max(0,r.n)
+    ));
+
+    rows.forEach(r=>{
+      const line=make("div","comex-visual-row");
+      const heading=make("div","comex-visual-line");
+      heading.append(
+        make("span","",r.name),
+        make("strong","",r.value)
+      );
+
+      const track=make("div","comex-visual-track");
+      const fill=make("div","comex-visual-fill");
+      fill.style.width=
+        Math.max(0,r.n)/max*100+"%";
+
+      track.append(fill);
+      line.append(heading,track);
+      box.append(line);
+    });
+
+    return box;
+  }
+
+  function donut(rows){
+    const box=card("Composição percentual");
+    const valid=rows.filter(r=>r.n>=0);
+    const total=valid.reduce((s,r)=>s+r.n,0);
+
+    if(total<=0){
+      box.append(make("p","comex-chart-note",
+        "Informe valores positivos para visualizar a composição."));
+      return box;
+    }
+
+    const colors=[
+      "#292A29","#777873","#B5B6B1",
+      "#E1E2DD","#999B95"
+    ];
+    const layout=make("div","comex-donut-layout");
+    const svg=document.createElementNS(
+      "http://www.w3.org/2000","svg"
+    );
+    svg.setAttribute("viewBox","0 0 200 200");
+    svg.setAttribute("class","comex-donut-svg");
+    svg.setAttribute("role","img");
+    svg.setAttribute("aria-label",
+      "Gráfico de composição percentual");
+
+    const radius=70;
+    const circumference=2*Math.PI*radius;
+    let offset=0;
+
+    valid.forEach((r,i)=>{
+      const length=r.n/total*circumference;
+      const circle=document.createElementNS(
+        "http://www.w3.org/2000","circle"
+      );
+      circle.setAttribute("cx","100");
+      circle.setAttribute("cy","100");
+      circle.setAttribute("r",String(radius));
+      circle.setAttribute("fill","none");
+      circle.setAttribute("stroke",colors[i%colors.length]);
+      circle.setAttribute("stroke-width","27");
+      circle.setAttribute(
+        "stroke-dasharray",
+        length+" "+circumference
+      );
+      circle.setAttribute(
+        "stroke-dashoffset",String(-offset)
+      );
+      circle.setAttribute(
+        "transform","rotate(-90 100 100)"
+      );
+      svg.append(circle);
+      offset+=length;
+    });
+
+    const legend=make("div","comex-donut-legend");
+    valid.forEach((r,i)=>{
+      const row=make("div","comex-legend-row");
+      const swatch=make("span","comex-legend-swatch");
+      swatch.style.background=colors[i%colors.length];
+
+      const percent=(r.n/total*100).toLocaleString(
+        "pt-BR",{maximumFractionDigits:1}
+      );
+      row.append(
+        swatch,
+        make("span","",r.name+" — "+percent+"%")
+      );
+      legend.append(row);
+    });
+
+    layout.append(svg,legend);
+    box.append(layout);
+    return box;
+  }
+
+  function chartRows(items,names){
+    return names.map(name=>{
+      const item=items.find(x=>x[0]===name);
+      if(!item)return null;
+      const n=amount(item[1]);
+      if(n===null)return null;
+      return {name,value:String(item[1]),n};
+    }).filter(Boolean);
+  }
+
+  // Acrescenta os gráficos depois do cálculo original.
+  const previousRender=window.render;
+  if(typeof previousRender!=="function")return;
+
+  window.render=function(id,items){
+    previousRender(id,items);
+
+    try{
+      const root=document.getElementById(id);
+      if(!root)return;
+
+      // Substitui o gráfico antigo por gráficos novos.
+      root.querySelectorAll(
+        ".comex-visuals,.chart-box"
+      ).forEach(el=>el.remove());
+
+      let comparison=[];
+      let composition=[];
+
+      if(id==="im_result"){
+        comparison=chartRows(items,[
+          "Valor aduaneiro CIF (simplificado)",
+          "Total de tributos estimados",
+          "Outras despesas locais",
+          "Custo total estimado"
+        ]);
+        composition=comparison.slice(0,3);
+      }
+
+      if(id==="ex_result"){
+        comparison=chartRows(items,[
+          "Receita convertida BRL",
+          "Custo total BRL",
+          "Lucro projetado BRL"
+        ]);
+
+        // Participações no custo da exportação.
+        const qty=Number(document.getElementById(
+          "ex_qty")?.value||0);
+        const cost=Number(document.getElementById(
+          "ex_cost")?.value||0);
+        const internal=Number(document.getElementById(
+          "ex_internal")?.value||0);
+        const freight=Number(document.getElementById(
+          "ex_freight")?.value||0);
+        const insurance=Number(document.getElementById(
+          "ex_insurance")?.value||0);
+        const fx=Number(document.getElementById(
+          "ex_fx")?.value||0);
+
+        composition=[
+          {name:"Produção",n:qty*cost},
+          {name:"Despesas internas",n:internal},
+          {name:"Frete internacional",n:freight*fx},
+          {name:"Seguro",n:insurance*fx}
+        ].filter(r=>Number.isFinite(r.n)&&r.n>=0);
+      }
+
+      if(id==="an_result"){
+        comparison=chartRows(items,[
+          "Receita bruta",
+          "Margem de contribuição unitária",
+          "Resultado gerencial estimado"
+        ]);
+      }
+
+      if(id==="mo_result"){
+        comparison=items.filter(([name])=>
+          /^(Marítimo|Aéreo|Rodoviário|Ferroviário)/.test(name)
+        ).map(([name,value])=>({
+          name,value:String(value),n:amount(value)
+        })).filter(r=>r.n!==null);
+      }
+
+      if(!comparison.length&&!composition.length)return;
+
+      const visuals=make("div","comex-visuals");
+      if(comparison.length){
+        visuals.append(bars(comparison));
+      }
+      if(composition.length){
+        visuals.append(donut(composition));
+      }
+
+      const table=root.querySelector("table");
+      if(table)table.before(visuals);
+      else root.append(visuals);
+
+      visuals.append(make(
+        "p","comex-chart-note",
+        "Gráficos ilustrativos baseados na simulação. " +
+        "Valores negativos não são exibidos como barras positivas."
+      ));
+    }catch(error){
+      console.warn(
+        "Gráficos não renderizados:",error
+      );
+    }
+  };
+})();
+</script>
+<!-- FIM DO PACOTE 2 -->
+
 </body>
 </html>
