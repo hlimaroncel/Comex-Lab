@@ -3207,5 +3207,381 @@ nav .nav-symbol svg {
 </script>
 <!-- FIM DOS NOVOS ÍCONES PREMIUM -->
 
+<!-- COMEX-LAB — MÓDULO CONSULTA DE NCM -->
+<style>
+#ncm {
+  grid-column:2;
+  grid-row:1;
+}
+.ncm-form {
+  display:flex;
+  gap:10px;
+  margin:24px 0 12px;
+}
+.ncm-form input {
+  flex:1;
+  min-width:0;
+}
+.ncm-form button {
+  background:#292A29;
+  color:white;
+  border:0;
+  border-radius:9px;
+  padding:12px 22px;
+  cursor:pointer;
+  font-weight:700;
+}
+.ncm-status {
+  margin:15px 0;
+  color:#777873;
+  font-size:13px;
+}
+.ncm-item {
+  background:#FFFFFF;
+  border:1px solid #E4E4E0;
+  border-radius:10px;
+  padding:17px;
+  margin:10px 0;
+}
+.ncm-code {
+  font-size:17px;
+  font-weight:800;
+  color:#292A29;
+  margin-bottom:7px;
+}
+.ncm-desc {
+  font-size:13px;
+  color:#575954;
+  line-height:1.6;
+}
+.ncm-source {
+  margin-top:17px;
+  padding:15px;
+  border-radius:9px;
+  background:#F7F7F5;
+  border:1px solid #E4E4E0;
+  font-size:12px;
+  line-height:1.7;
+}
+.ncm-source a {
+  color:#292A29;
+  font-weight:bold;
+  text-decoration:underline;
+}
+.ncm-copy {
+  margin-top:12px;
+  background:white;
+  border:1px solid #D5D6D1;
+  color:#292A29;
+  padding:9px 12px;
+  border-radius:7px;
+  cursor:pointer;
+}
+@media(max-width:650px){
+  #ncm {grid-column:auto}
+  .ncm-form {flex-direction:column}
+}
+</style>
+
+<script>
+(function(){
+  if(document.getElementById("ncm"))return;
+
+  const source=
+    "https://portalunico.siscomex.gov.br/classif/" +
+    "api/publico/nomenclatura/download/json";
+
+  const official=
+    "https://portalunico.siscomex.gov.br/classif/";
+
+  // Sexto painel
+  const panel=document.createElement("section");
+  panel.id="ncm";
+  panel.className="panel";
+
+  const title=document.createElement("h2");
+  title.textContent="Consulta de NCM";
+
+  const description=document.createElement("p");
+  description.className="description";
+  description.textContent=
+    "Pesquise a Nomenclatura Comum do Mercosul " +
+    "pelo código ou por palavras da descrição. " +
+    "Confira a classificação no Sistema Classif.";
+
+  const form=document.createElement("form");
+  form.className="ncm-form";
+
+  const input=document.createElement("input");
+  input.type="search";
+  input.placeholder=
+    "Ex.: tecido de malha, renda, 6006";
+  input.setAttribute(
+    "aria-label","Pesquisar código ou descrição NCM"
+  );
+
+  const search=document.createElement("button");
+  search.type="submit";
+  search.textContent="Pesquisar NCM";
+
+  form.append(input,search);
+
+  const status=document.createElement("div");
+  status.className="ncm-status";
+  status.setAttribute("role","status");
+  status.setAttribute("aria-live","polite");
+
+  const results=document.createElement("div");
+
+  const note=document.createElement("div");
+  note.className="ncm-source";
+  note.textContent=
+    "A consulta apresenta possíveis correspondências " +
+    "da tabela NCM. A classificação fiscal exige " +
+    "análise técnica da mercadoria. ";
+
+  const link=document.createElement("a");
+  link.href=official;
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.textContent="Consultar Sistema Classif oficial ↗";
+  note.append(link);
+
+  panel.append(
+    title,description,form,status,results,note
+  );
+
+  const home=document.getElementById("home");
+  if(!home)return;
+
+  home.after(panel);
+
+  // Adicionar acesso ao menu lateral.
+  const nav=document.querySelector("main nav");
+  if(nav){
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.dataset.module="ncm";
+
+    const icon=document.createElement("span");
+    icon.className="nav-symbol";
+    icon.textContent="⌕";
+
+    btn.append(icon,document.createTextNode("Consulta de NCM"));
+    btn.addEventListener("click",()=>{
+      showTab("ncm",btn);
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+
+    nav.append(btn);
+
+    // Adicionar cartão ao dashboard inicial.
+    const grid=home.querySelector(".home-grid");
+    if(grid){
+      const card=document.createElement("button");
+      card.type="button";
+      card.className="home-card";
+
+      const ic=document.createElement("span");
+      ic.className="home-icon";
+      ic.textContent="⌕";
+
+      const name=document.createElement("b");
+      name.textContent="Consulta de NCM";
+
+      const desc=document.createElement("small");
+      desc.textContent=
+        "Encontre códigos fiscais por nome da " +
+        "mercadoria ou número NCM.";
+
+      card.append(ic,name,desc);
+      card.onclick=()=>btn.click();
+      grid.append(card);
+    }
+  }
+
+  // Interpretar os registros da tabela oficial.
+  function normalize(text){
+    return String(text||"")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase();
+  }
+
+  function parseTable(data){
+    const found=[];
+    const visited=new WeakSet();
+
+    function walk(obj){
+      if(!obj||typeof obj!=="object")return;
+      if(visited.has(obj))return;
+      visited.add(obj);
+
+      if(Array.isArray(obj)){
+        obj.forEach(walk);
+        return;
+      }
+
+      const rawCode=
+        obj.codigo||obj.Codigo||
+        obj.codigoNcm||obj.codigoNCM||
+        obj.ncm||obj.NCM;
+
+      const rawDesc=
+        obj.descricao||obj.Descricao||
+        obj.descrição||obj.description||
+        obj.nome;
+
+      if(rawCode!=null && rawDesc!=null){
+        const digits=String(rawCode).replace(/\D/g,"");
+        if(digits.length===8){
+          found.push({
+            code:digits,
+            description:String(rawDesc)
+              .replace(/<[^>]*>/g," ")
+              .replace(/\s+/g," ").trim()
+          });
+        }
+      }
+
+      Object.values(obj).forEach(value=>{
+        if(value && typeof value==="object"){
+          walk(value);
+        }
+      });
+    }
+
+    walk(data);
+
+    const unique=new Map();
+    found.forEach(item=>{
+      if(!unique.has(item.code)){
+        unique.set(item.code,item);
+      }
+    });
+
+    return [...unique.values()];
+  }
+
+  let table=null;
+  let loading=null;
+
+  async function loadTable(){
+    if(table)return table;
+    if(loading)return loading;
+
+    loading=fetch(source)
+      .then(response=>{
+        if(!response.ok){
+          throw Error("Fonte indisponível");
+        }
+        return response.json();
+      })
+      .then(data=>{
+        const parsed=parseTable(data);
+        if(!parsed.length){
+          throw Error("Formato de dados não reconhecido");
+        }
+        table=parsed;
+        return table;
+      })
+      .finally(()=>{loading=null});
+
+    return loading;
+  }
+
+  function formatCode(code){
+    return code.slice(0,4)+"."+
+      code.slice(4,6)+"."+
+      code.slice(6,8);
+  }
+
+  function showResults(items){
+    results.replaceChildren();
+
+    items.forEach(item=>{
+      const box=document.createElement("div");
+      box.className="ncm-item";
+
+      const code=document.createElement("div");
+      code.className="ncm-code";
+      code.textContent=formatCode(item.code);
+
+      const desc=document.createElement("div");
+      desc.className="ncm-desc";
+      desc.textContent=item.description;
+
+      const copy=document.createElement("button");
+      copy.className="ncm-copy";
+      copy.type="button";
+      copy.textContent="Copiar código";
+
+      copy.onclick=async()=>{
+        try{
+          await navigator.clipboard.writeText(item.code);
+          copy.textContent="Código copiado";
+        }catch(err){
+          copy.textContent="Selecione o código acima";
+        }
+      };
+
+      box.append(code,desc,copy);
+      results.append(box);
+    });
+  }
+
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();
+
+    const term=input.value.trim();
+    if(!term){
+      status.textContent="Digite uma mercadoria ou código.";
+      return;
+    }
+
+    search.disabled=true;
+    results.replaceChildren();
+    status.textContent=
+      "Consultando a tabela NCM da Receita Federal...";
+
+    try{
+      const records=await loadTable();
+      const words=normalize(term).split(/\s+/)
+        .filter(Boolean);
+      const digits=term.replace(/\D/g,"");
+
+      const matches=records.filter(item=>{
+        if(digits.length>=4 &&
+           /^\s*[\d.\s]+\s*$/.test(term)){
+          return item.code.startsWith(digits);
+        }
+
+        const description=normalize(item.description);
+        return words.every(word=>
+          description.includes(word)
+        );
+      });
+
+      status.textContent=matches.length
+        ?matches.length+
+          " correspondência(s). Exibindo até 40 resultados."
+        :"Nenhuma correspondência encontrada. " +
+         "Tente termos mais gerais.";
+
+      showResults(matches.slice(0,40));
+    }catch(err){
+      status.textContent=
+        "Não foi possível carregar automaticamente a " +
+        "tabela NCM neste navegador. Utilize o link " +
+        "oficial abaixo para pesquisar por descrição " +
+        "ou código no Sistema Classif.";
+    }finally{
+      search.disabled=false;
+    }
+  });
+})();
+</script>
+<!-- FIM DO MÓDULO CONSULTA DE NCM -->
+
 </body>
 </html>
