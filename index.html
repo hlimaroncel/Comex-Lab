@@ -2586,5 +2586,397 @@ header p {
 </script>
 <!-- FIM DO PACOTE 3 -->
 
+<!-- COMEX-LAB — PACOTE 3B: PDF NOS CINCO MÓDULOS -->
+<style>
+.comex-report-btn {
+  background:#292A29;
+  color:#FFFFFF;
+  border:1px solid #292A29;
+  border-radius:9px;
+  padding:13px 18px;
+  margin:10px 7px 10px 0;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.comex-report-btn:disabled {
+  background:#E4E4E0;
+  color:#777873;
+  border-color:#E4E4E0;
+  cursor:not-allowed;
+}
+.comex-report-btn:not(:disabled):hover {
+  background:#474945;
+}
+</style>
+
+<script>
+(function(){
+  if(window.comexReportsAllReady)return;
+  window.comexReportsAllReady=true;
+
+  // A importação mantém o relatório já existente.
+  const modules=[
+    {
+      section:"exportacao",
+      result:"ex_result",
+      title:"Exportação",
+      highlights:[
+        "Receita convertida BRL",
+        "Custo total BRL",
+        "Lucro projetado BRL",
+        "Margem sobre receita"
+      ]
+    },
+    {
+      section:"incoterms",
+      result:"in_result",
+      title:"Incoterms 2020",
+      highlights:[
+        "Incoterm",
+        "Modal permitido",
+        "Transferência do risco"
+      ]
+    },
+    {
+      section:"modais",
+      result:"mo_result",
+      title:"Modais Logísticos",
+      highlights:[
+        "Menor custo entre as opções inseridas"
+      ]
+    },
+    {
+      section:"analise",
+      result:"an_result",
+      title:"Compras & Vendas",
+      highlights:[
+        "Receita bruta",
+        "Margem de contribuição (%)",
+        "Ponto de equilíbrio (unidades/kg)",
+        "Resultado gerencial estimado"
+      ]
+    }
+  ];
+
+  // Helpers para gerar HTML seguro.
+  function node(doc,tag,text,className){
+    const element=doc.createElement(tag);
+    if(className)element.className=className;
+    if(text!==undefined){
+      element.textContent=String(text);
+    }
+    return element;
+  }
+
+  function append(parent,tag,text,className){
+    const el=node(
+      parent.ownerDocument,tag,text,className
+    );
+    parent.appendChild(el);
+    return el;
+  }
+
+  function collectInputs(section){
+    return [...section.querySelectorAll(
+      ".fields input,.fields select"
+    )].map(field=>{
+      const label=field.closest("div")
+        ?.querySelector("label");
+      return [
+        label?.textContent.trim()||field.id,
+        field.tagName==="SELECT"
+          ?field.selectedOptions[0]?.textContent.trim()
+          :field.value
+      ];
+    }).filter(row=>row[0]);
+  }
+
+  function collectResults(result){
+    const table=result.querySelector("table");
+    if(!table)return [];
+
+    return [...table.querySelectorAll("tr")]
+      .filter(tr=>tr.cells.length>=2)
+      .map(tr=>[
+        tr.cells[0].textContent.trim(),
+        tr.cells[1].textContent.trim()
+      ]);
+  }
+
+  function report(config,section,result){
+    const rows=collectResults(result);
+
+    if(!rows.length){
+      alert("Calcule a operação antes de gerar o PDF.");
+      return;
+    }
+
+    const inputs=collectInputs(section);
+    const popup=window.open(
+      "","_blank","width=960,height=850"
+    );
+
+    if(!popup){
+      alert(
+        "Permita pop-ups para o Comex-Lab " +
+        "e tente novamente."
+      );
+      return;
+    }
+
+    const doc=popup.document;
+    doc.open();
+    doc.write(
+      '<!doctype html><html lang="pt-BR">' +
+      '<head><meta charset="utf-8">' +
+      '<title>Comex-Lab - Relatório</title>' +
+      '<style>' +
+      '@page{size:A4;margin:15mm}' +
+      '*{box-sizing:border-box}' +
+      'body{font:11px/1.5 Arial,sans-serif;' +
+      'color:#292A29;margin:0}' +
+      '.header{border-bottom:2px solid #292A29;' +
+      'padding-bottom:14px;margin-bottom:18px}' +
+      '.brand{font-size:25px;font-weight:800;' +
+      'letter-spacing:-1px}' +
+      '.muted{color:#777873}' +
+      'h2{font-size:14px;margin:22px 0 12px;' +
+      'border-bottom:1px solid #DDD;' +
+      'padding-bottom:7px}' +
+      '.grid{display:grid;' +
+      'grid-template-columns:repeat(2,1fr);gap:9px}' +
+      '.field,.kpi{border:1px solid #E4E4E0;' +
+      'background:#F7F7F5;padding:10px;' +
+      'border-radius:5px;break-inside:avoid}' +
+      '.field small,.kpi small{' +
+      'display:block;color:#777873}' +
+      '.field strong{display:block;font-size:12px}' +
+      '.kpis{display:grid;' +
+      'grid-template-columns:repeat(2,1fr);gap:9px}' +
+      '.kpi strong{font-size:15px;display:block;' +
+      'margin-top:5px;overflow-wrap:anywhere}' +
+      'table{width:100%;border-collapse:collapse}' +
+      'td{border-bottom:1px solid #E4E4E0;' +
+      'padding:7px 9px;vertical-align:top}' +
+      'td:last-child{text-align:right;' +
+      'font-weight:bold}' +
+      '.notice{padding:12px;' +
+      'background:#F7F7F5;' +
+      'border-left:3px solid #777873;' +
+      'margin:18px 0;break-inside:avoid}' +
+      '.chart-section{margin:12px 0}' +
+      '.comex-visuals{display:grid;' +
+      'grid-template-columns:1fr;gap:12px}' +
+      '.comex-visual-card{' +
+      'border:1px solid #E4E4E0;padding:12px;' +
+      'break-inside:avoid;border-radius:6px}' +
+      '.comex-visual-card h3{' +
+      'margin:0 0 12px;font-size:12px}' +
+      '.comex-visual-row{margin:9px 0}' +
+      '.comex-visual-line{display:flex;' +
+      'justify-content:space-between;gap:12px}' +
+      '.comex-visual-track{height:10px;' +
+      'background:#E4E4E0;border-radius:8px;' +
+      'overflow:hidden}' +
+      '.comex-visual-fill{height:100%;' +
+      'background:#51534F}' +
+      '.comex-donut-layout{display:flex;' +
+      'align-items:center;gap:20px}' +
+      '.comex-donut-svg{width:145px;height:145px}' +
+      '.comex-legend-row{display:flex;' +
+      'align-items:center;gap:7px;margin:6px 0}' +
+      '.comex-legend-swatch{' +
+      'width:10px;height:10px;display:inline-block}' +
+      '.comex-chart-note{font-size:10px;color:#777873}' +
+      'svg{max-width:100%}' +
+      '.actions{margin:20px 0}' +
+      '.actions button{background:#292A29;' +
+      'color:white;border:0;padding:12px 19px;' +
+      'cursor:pointer}' +
+      '@media print{' +
+      '.actions{display:none!important}' +
+      'body{-webkit-print-color-adjust:exact;' +
+      'print-color-adjust:exact}' +
+      'h2{break-after:avoid}}' +
+      '</style></head><body></body></html>'
+    );
+    doc.close();
+
+    const body=doc.body;
+
+    // Cabeçalho institucional.
+    const head=append(body,"div",undefined,"header");
+    append(head,"div","COMEX-LAB","brand");
+    append(
+      head,"div",
+      "RELATÓRIO DE SIMULAÇÃO — "+
+      config.title.toUpperCase()
+    );
+    append(
+      head,"div",
+      "Emitido em "+
+      new Date().toLocaleString("pt-BR"),
+      "muted"
+    );
+
+    // Informações preenchidas.
+    append(body,"h2","1. Dados da operação");
+    const dataGrid=append(body,"div",undefined,"grid");
+
+    inputs.forEach(([label,value])=>{
+      const item=append(
+        dataGrid,"div",undefined,"field"
+      );
+      append(item,"small",label);
+      append(item,"strong",value);
+    });
+
+    // Indicadores principais, sem recalcular nada.
+    const featured=rows.filter(([label])=>
+      config.highlights.includes(label)
+    );
+
+    if(featured.length){
+      append(body,"h2","2. Indicadores principais");
+      const kpis=append(body,"div",undefined,"kpis");
+
+      featured.forEach(([label,value])=>{
+        const card=append(
+          kpis,"div",undefined,"kpi"
+        );
+        append(card,"small",label);
+        append(card,"strong",value);
+      });
+    }
+
+    // Tabela completa de resultados.
+    append(body,"h2","3. Resultados detalhados");
+    const table=append(body,"table");
+
+    rows.forEach(([label,value])=>{
+      const tr=append(table,"tr");
+      append(tr,"td",label);
+      append(tr,"td",value);
+    });
+
+    // Reproduzir os gráficos já calculados,
+    // sem gerar novas fórmulas.
+    const visuals=result.querySelector(
+      ".comex-visuals"
+    );
+
+    if(visuals){
+      append(body,"h2","4. Gráficos da simulação");
+      const chart=append(
+        body,"div",undefined,"chart-section"
+      );
+
+      chart.appendChild(
+        doc.importNode(visuals,true)
+      );
+    }
+
+    // Nota educacional.
+    append(body,"h2","5. Observações");
+    append(
+      body,"div",
+      "Relatório gerado pelo Comex-Lab para " +
+      "finalidades educacionais. Os dados e " +
+      "resultados são estimativas da simulação, " +
+      "não substituem cotações oficiais, " +
+      "classificação fiscal, orientação " +
+      "aduaneira ou validação tributária. " +
+      "Verifique os parâmetros aplicáveis " +
+      "antes de realizar operações reais.",
+      "notice"
+    );
+
+    // Ação para impressão em PDF.
+    const actions=append(
+      body,"div",undefined,"actions"
+    );
+    const print=append(
+      actions,"button","Imprimir / Salvar PDF"
+    );
+    print.onclick=()=>popup.print();
+
+    popup.focus();
+  }
+
+  modules.forEach(config=>{
+    const section=document.getElementById(
+      config.section
+    );
+    const result=document.getElementById(
+      config.result
+    );
+
+    if(!section||!result)return;
+
+    const calculate=section.querySelector(
+      "button.calculate"
+    );
+    if(!calculate)return;
+
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="comex-report-btn";
+    button.textContent="Gerar relatório em PDF";
+    button.disabled=true;
+
+    calculate.after(button);
+
+    let ready=false;
+
+    function invalidate(){
+      ready=false;
+      button.disabled=true;
+    }
+
+    function validate(){
+      ready=Boolean(
+        result.querySelector("table") &&
+        collectResults(result).length
+      );
+      button.disabled=!ready;
+    }
+
+    // O resultado só é válido após a operação.
+    const observer=new MutationObserver(validate);
+    observer.observe(result,{
+      childList:true,
+      subtree:true
+    });
+
+    // Alterações exigem novo cálculo.
+    section.querySelectorAll(
+      "input,select"
+    ).forEach(field=>{
+      field.addEventListener("input",invalidate);
+      field.addEventListener("change",invalidate);
+    });
+
+    // Limpar dados também desativa o relatório.
+    section.querySelectorAll(
+      ".btn-clear,.btn-new"
+    ).forEach(clear=>{
+      clear.addEventListener("click",invalidate);
+    });
+
+    button.addEventListener("click",()=>{
+      if(!ready){
+        alert("Execute a simulação primeiro.");
+        return;
+      }
+      report(config,section,result);
+    });
+
+    validate();
+  });
+})();
+</script>
+<!-- FIM DOS RELATÓRIOS EM TODOS OS MÓDULOS -->
+
 </body>
 </html>
