@@ -2986,5 +2986,77 @@ header p {
 </style>
 <!-- FIM DO AJUSTE -->
 
+<!-- COMEX-LAB — CRÉDITOS DOS DESENVOLVEDORES -->
+<style>
+.comex-credits {
+  grid-column:2;
+  width:100%;
+  text-align:center;
+  padding:26px 15px;
+  margin:25px 0 10px;
+  border-top:1px solid #E4E4E0;
+  font-family:Inter,Arial,sans-serif;
+}
+
+.comex-credits .brand {
+  font-size:13px;
+  font-weight:700;
+  color:#292A29;
+  margin-bottom:7px;
+}
+
+.comex-credits .authors {
+  font-size:12px;
+  color:#777873;
+  line-height:1.7;
+}
+
+.comex-credits .copyright {
+  font-size:11px;
+  color:#999B95;
+  margin-top:7px;
+}
+
+@media(max-width:650px) {
+  .comex-credits {
+    grid-column:auto;
+    padding:22px 10px;
+  }
+}
+</style>
+
+<script>
+(function() {
+  if(document.querySelector(".comex-credits"))return;
+
+  const footer=document.createElement("div");
+  footer.className="comex-credits";
+
+  const brand=document.createElement("div");
+  brand.className="brand";
+  brand.textContent="Comex-Lab";
+
+  const authors=document.createElement("div");
+  authors.className="authors";
+  authors.textContent=
+    "Desenvolvido por Hanna Roncel e Ícaro Pinheiro";
+
+  const copyright=document.createElement("div");
+  copyright.className="copyright";
+  copyright.textContent=
+    "© 2026 Comex-Lab • Plataforma Educacional";
+
+  footer.append(brand,authors,copyright);
+
+  // Insere o rodapé após o conteúdo principal.
+  const main=document.querySelector("main");
+
+  if(main) {
+    main.appendChild(footer);
+  }
+})();
+</script>
+<!-- FIM DOS CRÉDITOS -->
+
 </body>
 </html>
