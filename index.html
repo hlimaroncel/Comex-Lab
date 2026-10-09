@@ -2074,5 +2074,113 @@ header p {
 </script>
 <!-- FIM DO PACOTE 2 -->
 
+<!-- COMEX-LAB — BANDEIRAS DISCRETAS V3 -->
+<style>
+.comex-country-inline {
+  position:relative;
+  width:100%;
+}
+.comex-country-inline select {
+  width:100%;
+  padding-left:43px !important;
+}
+.comex-country-inline-flag {
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  width:20px;
+  height:14px;
+  object-fit:cover;
+  border-radius:2px;
+  pointer-events:none;
+  border:1px solid #E4E4E0;
+}
+.comex-country-display {
+  display:none !important;
+}
+</style>
+
+<script>
+(function(){
+  const codes = {
+    "Brasil":"br","Argentina":"ar","Bolívia":"bo",
+    "Chile":"cl","Colômbia":"co","Equador":"ec",
+    "Paraguai":"py","Peru":"pe","Uruguai":"uy",
+    "Venezuela":"ve","Guiana":"gy","Suriname":"sr",
+    "Estados Unidos":"us","Canadá":"ca",
+    "México":"mx","Costa Rica":"cr",
+    "Guatemala":"gt","Panamá":"pa",
+    "República Dominicana":"do","El Salvador":"sv",
+    "Honduras":"hn","Nicarágua":"ni",
+    "Alemanha":"de","Portugal":"pt","Itália":"it",
+    "França":"fr","Espanha":"es",
+    "Reino Unido":"gb","Países Baixos":"nl",
+    "Bélgica":"be","Suíça":"ch","Áustria":"at",
+    "Polônia":"pl","Turquia":"tr","Suécia":"se",
+    "Noruega":"no","Dinamarca":"dk",
+    "Finlândia":"fi","Irlanda":"ie","Grécia":"gr",
+    "República Tcheca":"cz","Romênia":"ro",
+    "Hungria":"hu","Ucrânia":"ua","Rússia":"ru",
+    "China":"cn","Índia":"in","Japão":"jp",
+    "Coreia do Sul":"kr","Vietnã":"vn",
+    "Bangladesh":"bd","Paquistão":"pk",
+    "Indonésia":"id","Tailândia":"th",
+    "Malásia":"my","Singapura":"sg",
+    "Filipinas":"ph","Taiwan":"tw",
+    "Camboja":"kh","Sri Lanka":"lk",
+    "Emirados Árabes Unidos":"ae",
+    "Arábia Saudita":"sa","Israel":"il",
+    "Hong Kong":"hk","África do Sul":"za",
+    "Egito":"eg","Marrocos":"ma",
+    "Nigéria":"ng","Quênia":"ke",
+    "Tunísia":"tn","Etiópia":"et",
+    "Angola":"ao","Moçambique":"mz",
+    "Gana":"gh","Argélia":"dz",
+    "Austrália":"au","Nova Zelândia":"nz"
+  };
+
+  ["im_country","ex_country"].forEach(id=>{
+    const select=document.getElementById(id);
+    if(!select)return;
+    if(select.parentElement.classList.contains(
+      "comex-country-inline"
+    ))return;
+
+    const wrapper=document.createElement("div");
+    wrapper.className="comex-country-inline";
+
+    select.parentElement.insertBefore(wrapper,select);
+    wrapper.appendChild(select);
+
+    const img=document.createElement("img");
+    img.className="comex-country-inline-flag";
+    img.alt="";
+    img.setAttribute("aria-hidden","true");
+    wrapper.appendChild(img);
+
+    function update(){
+      const code=codes[select.value];
+      if(!code){
+        img.style.display="none";
+        select.style.paddingLeft="12px";
+        return;
+      }
+      img.style.display="block";
+      select.style.paddingLeft="43px";
+      img.src="https://flagcdn.com/w40/"+code+".png";
+    }
+
+    img.onerror=()=>{
+      img.style.display="none";
+    };
+
+    select.addEventListener("change",update);
+    update();
+  });
+})();
+</script>
+<!-- FIM DAS BANDEIRAS DISCRETAS -->
+
 </body>
 </html>
