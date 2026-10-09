@@ -521,5 +521,561 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 <!-- FIM DA CONFIGURACAO -->
 
+<!-- COMEX-LAB — INTERFACE EXECUTIVO PREMIUM V2 -->
+<style>
+:root {
+  --navy:#292A29;
+  --blue:#292A29;
+  --bg:#F7F7F5;
+  --border:#E4E4E0;
+}
+* { box-sizing:border-box; }
+
+body {
+  background:#F7F7F5;
+  color:#292A29;
+  font-family:Inter,Arial,sans-serif;
+}
+
+header {
+  background:#FFFFFF;
+  color:#292A29;
+  text-align:left;
+  padding:24px 35px;
+  border-bottom:1px solid #E4E4E0;
+}
+header h1 { font-size:25px; letter-spacing:-1px; }
+header p { color:#777873; font-size:12px; }
+header p:last-child { display:none; }
+
+main {
+  max-width:1480px;
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  align-items:start;
+  gap:22px;
+  padding:24px;
+  margin:auto;
+}
+
+nav {
+  grid-column:1;
+  grid-row:1 / span 10;
+  position:sticky;
+  top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-height:550px;
+  background:#292A29;
+  padding:18px 12px;
+  border-radius:15px;
+}
+nav::before {
+  content:"ÁREA DE ESTUDOS";
+  color:#A9AAA6;
+  font-size:10px;
+  letter-spacing:2px;
+  font-weight:bold;
+  padding:15px 10px;
+}
+nav button {
+  background:transparent;
+  color:#EEEEEB;
+  border:1px solid transparent;
+  text-align:left;
+  font-size:13px;
+  padding:13px;
+  width:100%;
+}
+nav button:hover { background:#393B39; }
+nav button.active {
+  background:#4A4B48;
+  color:white;
+  border:1px solid #636460;
+}
+.nav-symbol {
+  display:inline-block;
+  width:27px;
+  font-size:17px;
+}
+
+.panel {
+  grid-column:2;
+  grid-row:1;
+  background:white;
+  border:1px solid #E4E4E0;
+  border-radius:15px;
+  box-shadow:none;
+  padding:30px;
+  min-width:0;
+}
+h2 { color:#292A29; letter-spacing:-.7px; }
+.description { color:#777873; font-size:14px; }
+
+.fields {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.fields > div { min-width:0; }
+.field-group-heading {
+  grid-column:1/-1;
+  border-top:1px solid #E4E4E0;
+  padding-top:19px;
+  margin-top:9px;
+  color:#292A29;
+  font-size:15px;
+  font-weight:bold;
+}
+.field-group-heading:first-child {
+  border:0;
+  margin-top:0;
+  padding-top:0;
+}
+
+label {
+  color:#50514D;
+  font-size:12px;
+}
+input, select {
+  background:#FCFCFB;
+  color:#292A29;
+  border:1px solid #DCDDD9;
+  border-radius:9px;
+  min-height:46px;
+  padding:12px;
+}
+input:focus,select:focus {
+  outline:2px solid #A4A5A0;
+}
+button.calculate {
+  background:#292A29;
+  color:white;
+  border-radius:9px;
+  min-height:45px;
+}
+button.calculate:hover { background:#454743; }
+
+.btn-clear,.btn-new {
+  background:white;
+  color:#292A29;
+  border:1px solid #D7D8D3;
+  margin:7px 5px 0 0;
+  min-height:45px;
+}
+.btn-clear:hover,.btn-new:hover { background:#EEEEEA; }
+
+.result {
+  background:white;
+  border:1px solid #E4E4E0;
+  border-radius:14px;
+}
+.result td { border-color:#EDEDE9; }
+.result td:last-child { font-variant-numeric:tabular-nums; }
+
+.notice {
+  background:#F7F7F5;
+  color:#686964;
+  border:1px solid #E4E4E0;
+  border-left:3px solid #777873;
+  border-radius:8px;
+}
+.kpi-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:20px;
+}
+.kpi {
+  background:#F7F7F5;
+  padding:17px;
+  border:1px solid #E4E4E0;
+  border-radius:12px;
+}
+.kpi small {
+  display:block;
+  font-size:11px;
+  color:#777873;
+}
+.kpi strong {
+  display:block;
+  margin-top:9px;
+  font-size:21px;
+  overflow-wrap:anywhere;
+}
+
+.help-icon {
+  display:inline-block;
+  margin-left:5px;
+  font-size:10px;
+  border:1px solid #BBBBB7;
+  color:#777873;
+  border-radius:50%;
+  width:16px;
+  height:16px;
+  text-align:center;
+  line-height:15px;
+  cursor:help;
+}
+.chart-box {
+  border:1px solid #E4E4E0;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+.chart-row { margin:12px 0; font-size:12px; }
+.chart-track {
+  height:10px;
+  margin-top:6px;
+  background:#E8E8E4;
+  border-radius:20px;
+  overflow:hidden;
+}
+.chart-fill {
+  height:100%;
+  background:#777873;
+  border-radius:20px;
+}
+
+.home-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:15px;
+  margin-top:25px;
+}
+.home-card {
+  text-align:left;
+  border:1px solid #E4E4E0;
+  background:#FFFFFF;
+  padding:23px;
+  min-height:150px;
+  border-radius:13px;
+  color:#292A29;
+}
+.home-card:hover {
+  background:#F7F7F5;
+  border-color:#999A96;
+}
+.home-card b { display:block; font-size:16px; }
+.home-card small {
+  display:block;
+  color:#777873;
+  margin-top:10px;
+  line-height:1.6;
+}
+.home-icon {
+  display:block;
+  font-size:23px;
+  margin-bottom:17px;
+}
+
+footer { grid-column:2; }
+
+@media(max-width:950px) {
+  main { grid-template-columns:175px minmax(0,1fr);gap:14px; }
+  .fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:650px) {
+  main { display:block;padding:12px; }
+  header { padding:22px; }
+  nav {
+    min-height:auto;
+    position:static;
+    display:flex;
+    flex-direction:row;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    margin-bottom:14px;
+  }
+  nav::before { display:none; }
+  nav button {
+    min-width:130px;
+    text-align:center;
+  }
+  .nav-symbol { display:none; }
+  .panel { padding:17px; }
+  .fields,.home-grid,.kpi-grid {
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+<script>
+(function() {
+  const modules = [
+    ["home","Visão geral","⌂",
+     "Conheça os simuladores de comércio exterior."],
+    ["importacao","Importação","↓",
+     "Custos, impostos e preço por kg."],
+    ["exportacao","Exportação","↑",
+     "Formação de preços e lucro internacional."],
+    ["incoterms","Incoterms","⇄",
+     "Regras, responsabilidades e riscos."],
+    ["modais","Modais Logísticos","≋",
+     "Compare fretes, custos e prazos."],
+    ["analise","Compras & Vendas","▤",
+     "Margem, rentabilidade e ponto de equilíbrio."]
+  ];
+
+  const nav = document.querySelector("main nav");
+  if (!nav || document.getElementById("home")) return;
+
+  function openModule(id) {
+    const button = nav.querySelector(
+      '[data-module="' + id + '"]'
+    );
+    if (button) showTab(id,button);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  // Menu lateral
+  nav.innerHTML = "";
+  modules.forEach(([id,name,icon]) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.module = id;
+    btn.innerHTML =
+      '<span class="nav-symbol">' + icon + '</span>' + name;
+    btn.onclick = () => openModule(id);
+    nav.appendChild(btn);
+  });
+
+  // Página inicial
+  const home = document.createElement("section");
+  home.id = "home";
+  home.className = "panel active";
+
+  const title = document.createElement("h2");
+  title.textContent = "Bem-vindo ao Comex-Lab";
+
+  const intro = document.createElement("p");
+  intro.className = "description";
+  intro.textContent =
+    "Uma plataforma para aprender, simular e analisar " +
+    "operações de comércio exterior.";
+
+  const grid = document.createElement("div");
+  grid.className = "home-grid";
+
+  modules.slice(1).forEach(([id,name,icon,desc]) => {
+    const card = document.createElement("button");
+    card.className = "home-card";
+    card.type = "button";
+    card.innerHTML =
+      '<span class="home-icon">' + icon + '</span>' +
+      '<b>' + name + '</b><small>' + desc + '</small>';
+    card.onclick = () => openModule(id);
+    grid.appendChild(card);
+  });
+
+  home.append(title,intro,grid);
+  nav.after(home);
+
+  document.querySelectorAll(".panel").forEach(p => {
+    p.classList.toggle("active",p.id === "home");
+  });
+  nav.querySelector('[data-module="home"]')
+    .classList.add("active");
+
+  // Organizar campos por grupos
+  const groups = {
+    importacao:[
+      [0,"01 — Origem e mercadoria"],
+      [4,"02 — Câmbio e logística"],
+      [7,"03 — Impostos e despesas"]
+    ],
+    exportacao:[
+      [0,"01 — Dados da exportação"],
+      [3,"02 — Custos e logística"]
+    ],
+    incoterms:[
+      [0,"01 — Regra comercial internacional"]
+    ],
+    modais:[
+      [0,"01 — Informações da carga"],
+      [2,"02 — Custos e prazos dos modais"]
+    ],
+    analise:[
+      [0,"01 — Mercadoria e preço"],
+      [3,"02 — Tributos e despesas"]
+    ]
+  };
+
+  Object.entries(groups).forEach(([id,headings]) => {
+    const container =
+      document.querySelector("#" + id + " .fields");
+
+    if (!container) return;
+    const fields = [...container.children];
+
+    [...headings].reverse().forEach(([index,text]) => {
+      if (!fields[index]) return;
+
+      const heading = document.createElement("div");
+      heading.className = "field-group-heading";
+      heading.textContent = text;
+
+      container.insertBefore(heading,fields[index]);
+    });
+  });
+
+  // Ajuda nos termos de comércio exterior
+  const help = [
+    [/Incoterm/i,"Define obrigações, custos e transferência do risco."],
+    [/Câmbio/i,"Taxa de conversão entre moedas."],
+    [/Frete/i,"Custo do transporte da mercadoria."],
+    [/Seguro/i,"Proteção contra riscos previstos na apólice."],
+    [/ICMS/i,"Imposto estadual, aqui simulado."],
+    [/IPI/i,"Imposto sobre Produtos Industrializados."],
+    [/PIS|COFINS/i,"Contribuições tributárias federais."],
+    [/Margem/i,"Indicador de resultado sobre a venda."]
+  ];
+
+  document.querySelectorAll(".panel label").forEach(label => {
+    const found = help.find(([pattern]) =>
+      pattern.test(label.textContent)
+    );
+    if (!found) return;
+
+    const tip = document.createElement("span");
+    tip.className = "help-icon";
+    tip.textContent = "?";
+    tip.title = found[1];
+    tip.tabIndex = 0;
+    label.appendChild(tip);
+  });
+
+  // Botões adicionais de cada simulador
+  document.querySelectorAll(".panel").forEach(panel => {
+    if (panel.id === "home") return;
+
+    const calc = panel.querySelector("button.calculate");
+    if (!calc) return;
+
+    function clearFields() {
+      panel.querySelectorAll('input[type="number"]')
+        .forEach(input => input.value = "0");
+
+      panel.querySelectorAll(".result")
+        .forEach(result => result.innerHTML = "");
+    }
+
+    const clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "btn-clear";
+    clear.textContent = "Limpar campos";
+    clear.onclick = clearFields;
+
+    const restart = document.createElement("button");
+    restart.type = "button";
+    restart.className = "btn-new";
+    restart.textContent = "Nova simulação";
+    restart.onclick = () => {
+      clearFields();
+      panel.querySelector("input,select")?.focus();
+    };
+
+    calc.after(clear,restart);
+  });
+
+  // Indicadores visuais sem alterar as fórmulas
+  const originalRender = window.render;
+
+  if (typeof originalRender === "function") {
+    window.render = function(id,items) {
+      originalRender(id,items);
+
+      const root = document.getElementById(id);
+      if (!root) return;
+
+      const matches = items.filter(([name]) =>
+        /custo total|custo por kg|lucro projetado|margem|resultado gerencial|preço mínimo/i
+          .test(name)
+      ).slice(0,3);
+
+      if (matches.length) {
+        const kpis = document.createElement("div");
+        kpis.className = "kpi-grid";
+
+        matches.forEach(([name,value]) => {
+          const card = document.createElement("div");
+          card.className = "kpi";
+
+          const label = document.createElement("small");
+          label.textContent = name;
+
+          const strong = document.createElement("strong");
+          strong.textContent = value;
+
+          card.append(label,strong);
+          kpis.append(card);
+        });
+
+        root.prepend(kpis);
+      }
+
+      // Gráfico monocromático da composição de custos
+      if (id === "im_result") {
+        const names = [
+          "Valor aduaneiro CIF (simplificado)",
+          "Total de tributos estimados",
+          "Outras despesas locais"
+        ];
+
+        const data = items
+          .filter(([name]) => names.includes(name))
+          .map(([name,value]) => {
+            const numeric = Number(
+              String(value)
+                .replace(/[^0-9,.-]/g,"")
+                .replace(/\./g,"")
+                .replace(",",".")
+            );
+            return {name,value,numeric};
+          })
+          .filter(x => Number.isFinite(x.numeric));
+
+        const max = Math.max(
+          1,...data.map(x => x.numeric)
+        );
+
+        const box = document.createElement("div");
+        box.className = "chart-box";
+
+        const heading = document.createElement("b");
+        heading.textContent = "Composição de custos";
+        box.appendChild(heading);
+
+        data.forEach(x => {
+          const row = document.createElement("div");
+          row.className = "chart-row";
+
+          const label = document.createElement("span");
+          label.textContent = x.name + " — " + x.value;
+
+          const track = document.createElement("div");
+          track.className = "chart-track";
+
+          const fill = document.createElement("div");
+          fill.className = "chart-fill";
+          fill.style.width =
+            (100*x.numeric/max).toFixed(2) + "%";
+
+          track.appendChild(fill);
+          row.append(label,track);
+          box.appendChild(row);
+        });
+
+        const table = root.querySelector("table");
+        if (table) root.insertBefore(box,table);
+      }
+    };
+  }
+})();
+</script>
+<!-- FIM DA INTERFACE EXECUTIVO PREMIUM V2 -->
+
 </body>
 </html>
